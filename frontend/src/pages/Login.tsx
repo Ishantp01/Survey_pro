@@ -27,7 +27,6 @@ export default function Login() {
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json().catch(() => ({}));
-      // Treat custom 420 success or standard 2xx success with { success: true }
       if (res.status === 420 || (res.ok && data && data.success)) {
         if (data && data.token) {
           login(data.token);
