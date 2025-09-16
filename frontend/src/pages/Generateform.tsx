@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "react-toastify/dist/ReactToastify.css";
 
 const GenerateForm: React.FC = () => {
-  const navigate = useNavigate();
   const { logout } = useAuth();
   const [formLink, setFormLink] = useState<string | null>(null);
   const [formId, setFormId] = useState<string | null>(null);
