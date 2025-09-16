@@ -1,49 +1,178 @@
-import Form from "../models/form.model.js";
+import crypto from "crypto";
+import FormLink from "../models/form.model.js";
 import FormResponse from "../models/formResponse.model.js";
-import User from "../models/user.model.js";
-import { v4 as uuidv4 } from "uuid";
 
-// Admin creates a new form
-export const createForm = async (req, res) => {
+/**
+ * @desc Generate a unique form link
+ * @route POST /api/form/generate
+ */
+export const generateFormLink = async (req, res) => {
   try {
-    const newForm = await Form.create({ formId: uuidv4() });
+    // 🔁 Reset all users
+    await User.updateMany({}, {
+      $set: {
+        password: null,
+        firstLogin: true,
+        formSubmitted: false
+      }
+    });
 
-    // Reset all users' formSubmitted to false
-    await User.updateMany({}, { $set: { formSubmitted: false } });
+    // 🔑 Generate new link
+    const linkId = crypto.randomBytes(16).toString("hex");
+    const newLink = await FormLink.create({ linkId });
 
-    res.status(201).json({ success: true, form: newForm });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(201).json({
+      success: true,
+      message: "Form link generated successfully. All users have been reset.",
+      link: `https://yourfrontend.com/form/${linkId}`,
+      linkId: newLink.linkId
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
-// User submits response
-export const submitFormResponse = async (req, res) => {
+/**
+ * @desc Get form structure if link is valid & not used
+ * @route GET /api/form/:linkId
+ */
+export const getFormStructure = async (req, res) => {
   try {
-    const { formId, headquarters, division, group, position } = req.body;
-    const userId = req.user._id; // from auth middleware
+    const { linkId } = req.params;
 
-    const form = await Form.findOne({ formId, isActive: true });
-    if (!form) return res.status(404).json({ message: "Form not found" });
+    const link = await FormLink.findOne({ linkId });
 
-    const alreadySubmitted = await FormResponse.findOne({ formId: form._id, userId });
-    if (alreadySubmitted) {
-      return res.status(400).json({ message: "You already submitted this form" });
+    if (!link) {
+      return res.status(404).json({ success: false, message: "Invalid form link" });
     }
 
+    if (link.isUsed) {
+      return res.status(400).json({ success: false, message: "Form already submitted" });
+    }
+
+    // Send structure (or frontend can hardcode structure too)
+    res.json({
+      success: true,
+      structure: {
+        fields: ["headquarters", "division", "group", "position"]
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+/**
+ * @desc Submit the form response
+ * @route POST /api/form/:linkId/submit
+ */
+export const submitForm = async (req, res) => {
+  try {
+    const { linkId } = req.params;
+    const { headquarters, division, group, position } = req.body;
+
+    const link = await FormLink.findOne({ linkId });
+
+    if (!link) {
+      return res.status(404).json({ success: false, message: "Invalid form link" });
+    }
+
+    if (link.isUsed) {
+      return res.status(400).json({ success: false, message: "Form already submitted" });
+    }
+
+    // Save response
     const response = await FormResponse.create({
-      formId: form._id,
-      userId,
+      linkId,
       headquarters,
       division,
       group,
-      position,
+      position
     });
 
-    await User.findByIdAndUpdate(userId, { formSubmitted: true });
+    // Mark link as used
+    link.isUsed = true;
+    link.usedAt = new Date();
+    await link.save();
 
-    res.status(201).json({ success: true, response });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(201).json({ success: true, message: "Form submitted successfully", response });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+/**
+ * @desc Get all submitted form responses
+ * @route GET /api/form/responses/all
+ */
+export const getAllResponses = async (req, res) => {
+  try {
+    const responses = await FormResponse.find().sort({ submittedAt: -1 });
+    res.json({ success: true, responses });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+/**
+ * @desc Delete a form response and its associated link
+ * @route DELETE /api/form/responses/:id
+ */
+export const deleteResponse = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const response = await FormResponse.findById(id);
+    if (!response) {
+      return res.status(404).json({ success: false, message: "Response not found" });
+    }
+
+    // Delete response
+    await FormResponse.findByIdAndDelete(id);
+
+    // Delete associated link
+    await FormLink.findOneAndDelete({ linkId: response.linkId });
+
+    res.json({ success: true, message: "Response and link deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+export const sendFormInvites = async (req, res) => {
+  try {
+    const { subject, message, formLink } = req.body;
+
+    if (!subject || !message || !formLink) {
+      return res.status(400).json({ error: "All fields are required." });
+    }
+
+    const users = await User.find({ email: /@(outlook|hotmail)\.com$/i });
+
+    if (users.length === 0) {
+      return res.status(404).json({ error: "No Outlook users found." });
+    }
+
+    // Send emails in parallel
+    await Promise.all(
+      users.map((user) =>
+        sendEmail(
+          user.email,
+          subject,
+          `${message}\n\nForm Link: ${formLink}`,
+          `<p>${message}</p><p><a href="${formLink}">${formLink}</a></p>`
+        )
+      )
+    );
+
+    res.json({ message: "Emails sent successfully." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to send emails." });
   }
 };
