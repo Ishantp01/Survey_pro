@@ -29,7 +29,7 @@ const GenerateForm: React.FC = () => {
     try {
       setLoading(true);
       const res = await axios.post(
-        "http://localhost:5000/api/form/generate",
+        "https://survey-pro-44pf.onrender.com/api/form/generate",
         {}
       );
       if (res.data.success) {
@@ -71,7 +71,7 @@ const GenerateForm: React.FC = () => {
     try {
       setLoading(true);
       const res = await axios.post(
-        "http://localhost:5000/api/form/send-invites",
+        "https://survey-pro-44pf.onrender.com/api/form/send-invites",
         {
           formLink,
         }
@@ -100,7 +100,7 @@ const GenerateForm: React.FC = () => {
     try {
       setLoading(true);
       const res = await axios.delete(
-        `http://localhost:5000/api/form/responses/${formId}`
+        `https://survey-pro-44pf.onrender.com/api/form/responses/${formId}`
       );
       if (res.data.success) {
         setFormLink(null);
