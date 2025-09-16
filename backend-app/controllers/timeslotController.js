@@ -4,15 +4,14 @@ import User from "../models/user.model.js";
 // Submit timeslot form
 export const submitTimeSlots = async (req, res) => {
   try {
-    const userEmail = req.user.email; // extracted from token in middleware
+    const userEmail = req.user.email; // from token
     const { slots } = req.body;
 
     if (!slots || !Array.isArray(slots) || slots.length === 0) {
-      return res.status(400).json({ success: false, message: "Slots are required." });
+      return res.status(400).json({ success: false, message: "Slots are required" });
     }
 
-    // Ensure each slot has both activities
-    for (let slot of slots) {
+    for (const slot of slots) {
       if (!slot.timeRange || !slot.activity1 || !slot.activity2) {
         return res.status(400).json({
           success: false,
@@ -22,24 +21,13 @@ export const submitTimeSlots = async (req, res) => {
     }
 
     const submission = await TimeSlotSubmission.create({
-      email: userEmail,
+      userEmail,
       slots
     });
 
-    // Mark user as submitted
-    await User.findOneAndUpdate(
-      { email: userEmail },
-      { formSubmitted: true },
-      { new: true }
-    );
-
-    res.status(201).json({
-      success: true,
-      message: "Timeslot submission saved successfully",
-      submission
-    });
+    res.status(201).json({ success: true, submission });
   } catch (error) {
-    console.error("Submit timeslots error:", error);
+    console.error("Submit error:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
