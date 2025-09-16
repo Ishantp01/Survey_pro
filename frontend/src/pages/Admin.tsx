@@ -1,94 +1,148 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BarChart3, Calendar, Filter, Download } from "lucide-react";
 import Heading from "../components/Heading";
 
-// Define TypeScript types for mockData
-type SubmissionByHour = { hour: string; count: number };
-type SubmissionByDay = { day: string; count: number };
+// Define TypeScript types for survey data
+type TaskOption =
+  | "업무 1만 수행"
+  | "영업/직무 관련 업무수행"
+  | "업무 관련 커뮤니케이션(메일, 메신저, 전화 등)"
+  | "회의·보고 자료 작성"
+  | "회의·보고 참석"
+  | "재무/정산/결산 업무"
+  | "교육 참여"
+  | string; // For "기타" with free-text input
 
-type TimeRangeData =
-  | {
-      totalSubmissions: number;
-      avgTimeSpent: string;
-      completionRate: string;
-      topDept: string;
-      submissionsByHour: SubmissionByHour[];
-      submissionsByDay?: never;
-    }
-  | {
-      totalSubmissions: number;
-      avgTimeSpent: string;
-      completionRate: string;
-      topDept: string;
-      submissionsByDay: SubmissionByDay[];
-      submissionsByHour?: never;
-    };
+type SurveyEntry = {
+  date: string; // e.g., "2025-09-18"
+  timeInterval: string; // e.g., "07:00-07:30"
+  task1: TaskOption;
+  task2: TaskOption;
+};
 
-type TimeRangeKey = "last24h" | "lastWeek" | "last10Days";
+type TimeRangeData = {
+  totalSubmissions: number;
+  avgTimeSpent: string;
+  completionRate: string;
+  topDept: string;
+  surveyEntries: SurveyEntry[];
+};
+
+type TimeRangeKey = "surveyPeriod";
 
 const mockData: Record<TimeRangeKey, TimeRangeData> = {
-  last24h: {
-    totalSubmissions: 45,
-    avgTimeSpent: "12m 30s",
-    completionRate: "92%",
-    topDept: "본부 A",
-    submissionsByHour: [
-      { hour: "00:00", count: 0 },
-      { hour: "04:00", count: 2 },
-      { hour: "08:00", count: 8 },
-      { hour: "12:00", count: 15 },
-      { hour: "16:00", count: 12 },
-      { hour: "20:00", count: 8 },
-      { hour: "23:00", count: 0 },
-    ],
-  },
-  lastWeek: {
-    totalSubmissions: 320,
-    avgTimeSpent: "15m 20s",
-    completionRate: "88%",
-    topDept: "본부 B",
-    submissionsByDay: [
-      { day: "Mon", count: 50 },
-      { day: "Tue", count: 55 },
-      { day: "Wed", count: 60 },
-      { day: "Thu", count: 52 },
-      { day: "Fri", count: 58 },
-      { day: "Sat", count: 25 },
-      { day: "Sun", count: 20 },
-    ],
-  },
-  last10Days: {
-    totalSubmissions: 850,
-    avgTimeSpent: "14m 45s",
+  surveyPeriod: {
+    totalSubmissions: 450,
+    avgTimeSpent: "14m 10s",
     completionRate: "90%",
     topDept: "본부 A",
-    submissionsByDay: [
-      { day: "D-9", count: 70 },
-      { day: "D-8", count: 75 },
-      { day: "D-7", count: 80 },
-      { day: "D-6", count: 85 },
-      { day: "D-5", count: 90 },
-      { day: "D-4", count: 95 },
-      { day: "D-3", count: 88 },
-      { day: "D-2", count: 92 },
-      { day: "D-1", count: 85 },
-      { day: "Today", count: 90 },
+    surveyEntries: [
+      // Sample data for Sep 18, 2025
+      {
+        date: "2025-09-18",
+        timeInterval: "07:00-07:30",
+        task1: "영업/직무 관련 업무수행",
+        task2: "업무 1만 수행",
+      },
+      {
+        date: "2025-09-18",
+        timeInterval: "07:30-08:00",
+        task1: "업무 관련 커뮤니케이션(메일, 메신저, 전화 등)",
+        task2: "기타: 팀 회의 준비",
+      },
+      {
+        date: "2025-09-18",
+        timeInterval: "21:30-22:00",
+        task1: "회의·보고 자료 작성",
+        task2: "회의·보고 참석",
+      },
+      // Sample data for Sep 19, 2025
+      {
+        date: "2025-09-19",
+        timeInterval: "07:00-07:30",
+        task1: "교육 참여",
+        task2: "업무 1만 수행",
+      },
+      // Add more entries as needed for other dates and intervals
+      // In a real app, this would come from the backend
     ],
   },
 };
 
+// Generate 30-minute time intervals from 07:00 to 22:00
+const timeIntervals = (() => {
+  const intervals: string[] = [];
+  for (let hour = 7; hour < 22; hour++) {
+    intervals.push(
+      `${hour.toString().padStart(2, "0")}:00-${hour
+        .toString()
+        .padStart(2, "0")}:30`
+    );
+    intervals.push(`${hour.toString().padStart(2, "0")}:30-${hour + 1}:00`);
+  }
+  return intervals;
+})();
+
+// Working days from Sep 18 to Oct 2, excluding weekends
+const workingDays = [
+  "2025-09-18",
+  "2025-09-19",
+  "2025-09-22",
+  "2025-09-23",
+  "2025-09-24",
+  "2025-09-25",
+  "2025-09-26",
+  "2025-09-29",
+  "2025-09-30",
+  "2025-10-01",
+  "2025-10-02",
+];
+
 export default function Admin() {
-  const [activeTab, setActiveTab] = useState<TimeRangeKey>("last24h");
-  const [dateRange, setDateRange] = useState<TimeRangeKey>("last24h");
+  const [activeTab] = useState<TimeRangeKey>("surveyPeriod");
+  const [dateRange, setDateRange] = useState<string>("all");
   const [deptFilter, setDeptFilter] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
+  const [surveyData, setSurveyData] = useState<SurveyEntry[]>(
+    mockData.surveyPeriod.surveyEntries
+  );
 
   const data = mockData[activeTab];
 
   const toggleFilters = () => setShowFilters(!showFilters);
 
+  // Backend integration placeholder
+  useEffect(() => {
+    // Fetch survey data from backend
+    // Example: Replace with your API endpoint
+    /*
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/survey-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dateRange, deptFilter }),
+        });
+        const result = await response.json();
+        setSurveyData(result.surveyEntries);
+      } catch (error) {
+        console.error('Error fetching survey data:', error);
+      }
+    };
+    fetchData();
+    */
+  }, [dateRange, deptFilter]);
+
+  // Filter data based on dateRange and deptFilter
+  const filteredData = surveyData.filter((entry) => {
+    const dateMatch = dateRange === "all" || entry.date === dateRange;
+    // Add department filter logic here when integrated with backend
+    // For now, deptFilter is not applied to mock data
+    return dateMatch;
+  });
+
   return (
-    <div className="min-h-screen bg-gradient-to-br px-4 py-10">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-white px-4 py-10">
       <Heading />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
@@ -127,16 +181,15 @@ export default function Admin() {
                 </label>
                 <select
                   value={dateRange}
-                  onChange={(e) => {
-                    const value = e.target.value as TimeRangeKey;
-                    setDateRange(value);
-                    setActiveTab(value);
-                  }}
+                  onChange={(e) => setDateRange(e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white transition"
                 >
-                  <option value="last24h">지난 24시간</option>
-                  <option value="lastWeek">지난 주</option>
-                  <option value="last10Days">지난 10일</option>
+                  <option value="all">전체 (9월 18일 ~ 10월 2일)</option>
+                  {workingDays.map((day) => (
+                    <option key={day} value={day}>
+                      {day}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
@@ -176,45 +229,6 @@ export default function Admin() {
               </div>
             </div>
           )}
-        </div>
-
-        {/* Tabs */}
-        <div className="bg-white shadow-xl rounded-xl border border-gray-100 mb-8">
-          <div className="flex border-b border-gray-200">
-            <button
-              onClick={() => setActiveTab("last24h")}
-              className={`px-6 py-4 font-semibold flex items-center gap-2 ${
-                activeTab === "last24h"
-                  ? "text-green-700 border-b-2 border-green-700"
-                  : "text-gray-600 hover:text-green-700"
-              } transition`}
-            >
-              <BarChart3 className="w-4 h-4" />
-              지난 24시간
-            </button>
-            <button
-              onClick={() => setActiveTab("lastWeek")}
-              className={`px-6 py-4 font-semibold flex items-center gap-2 ${
-                activeTab === "lastWeek"
-                  ? "text-green-700 border-b-2 border-green-700"
-                  : "text-gray-600 hover:text-green-700"
-              } transition`}
-            >
-              <BarChart3 className="w-4 h-4" />
-              지난 주
-            </button>
-            <button
-              onClick={() => setActiveTab("last10Days")}
-              className={`px-6 py-4 font-semibold flex items-center gap-2 ${
-                activeTab === "last10Days"
-                  ? "text-green-700 border-b-2 border-green-700"
-                  : "text-gray-600 hover:text-green-700"
-              } transition`}
-            >
-              <BarChart3 className="w-4 h-4" />
-              지난 10일
-            </button>
-          </div>
         </div>
 
         {/* Stats Cards */}
@@ -263,35 +277,49 @@ export default function Admin() {
         {/* Table Section */}
         <div className="bg-white shadow-xl rounded-xl p-6 border border-gray-100">
           <h3 className="text-lg font-semibold text-green-600 mb-4">
-            제출 추이 ({activeTab === "last24h" ? "시간별" : "일별"})
+            제출 추이 (9월 18일 ~ 10월 2일)
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left text-gray-700">
               <thead className="text-xs text-gray-800 uppercase bg-gray-50">
                 <tr>
                   <th scope="col" className="px-6 py-3">
-                    {activeTab === "last24h" ? "시간" : "날짜"}
+                    날짜
                   </th>
                   <th scope="col" className="px-6 py-3">
-                    제출 수
+                    시간
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    업무 1
+                  </th>
+                  <th scope="col" className="px-6 py-3">
+                    업무 2
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {(activeTab === "last24h"
-                  ? data.submissionsByHour
-                  : data.submissionsByDay
-                )?.map((item, index) => (
-                  <tr
-                    key={index}
-                    className="border-b border-gray-200 hover:bg-gray-50"
-                  >
-                    <td className="px-6 py-4">
-                      {"hour" in item ? item.hour : item.day}
+                {filteredData.length > 0 ? (
+                  filteredData.map((entry, index) => (
+                    <tr
+                      key={index}
+                      className="border-b border-gray-200 hover:bg-gray-50"
+                    >
+                      <td className="px-6 py-4">{entry.date}</td>
+                      <td className="px-6 py-4">{entry.timeInterval}</td>
+                      <td className="px-6 py-4">{entry.task1}</td>
+                      <td className="px-6 py-4">{entry.task2}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="px-6 py-4 text-center text-gray-600"
+                    >
+                      데이터가 없습니다.
                     </td>
-                    <td className="px-6 py-4">{item.count}</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
