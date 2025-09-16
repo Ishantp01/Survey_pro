@@ -1,26 +1,24 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const userRoutes = require('./routes/user.routes');
-const formRoutes = require('./routes/form.routes');
-const adminRoutes = require('./routes/admin.routes');
-const authMiddleware = require('./middlewares/auth.middleware');
-const errorMiddleware = require('./middlewares/error.middleware');
+// app.js
+import express from "express";
+import dotenv from "dotenv";
+import connectDB from "./config/db.js";
+import helmet from 'helmet'
+
+import userRoutes from "./routes/user.routes.js";
 
 dotenv.config();
 
 const app = express();
-
-// Middleware
 app.use(express.json());
-app.use(authMiddleware);
+app.use(helmet())
 
-// Routes
-app.use('/api/users', userRoutes);
-app.use('/api/forms', formRoutes);
-app.use('/api/admin', adminRoutes);
+// connect DB (use env variable)
+connectDB(process.env.MONGO_URI);
 
-// Error handling middleware
-app.use(errorMiddleware);
+// mount routes
+app.use("/api/users", userRoutes);
 
-module.exports = app;
+// basic health check
+app.get("/", (req, res) => res.send("OK"));
+
+export default app;
