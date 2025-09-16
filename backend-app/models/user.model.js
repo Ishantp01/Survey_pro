@@ -2,9 +2,21 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
   email: { type: String, unique: true, required: true },
-  password: { type: String }, // empty until first login
-  firstLogin: { type: Boolean, default: true }, // true until password set
-  formSubmitted: { type: Boolean, default: false }, // reset each new form
+  password: {
+    type: String,
+    required: true,
+    minlength: [8, "Password must be at least 8 characters long."],
+    validate: {
+      validator: function (v) {
+        // Must contain at least one uppercase, one lowercase, one digit, and one special character
+        return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?#&_])[A-Za-z\d@$!%*?#&_]{8,}$/.test(v);
+      },
+      message:
+        "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character."
+    }
+  },
+  firstLogin: { type: Boolean, default: true },
+  formSubmitted: { type: Boolean, default: false },
 });
 
 export default mongoose.model("User", userSchema);

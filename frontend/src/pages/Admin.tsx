@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+// import React, { useState } from "react";
+import { useState } from "react";
 import { BarChart3, Calendar, Filter, Download } from "lucide-react";
+import Heading from "../components/Heading";
 
 const mockData = {
   last24h: {
@@ -64,15 +66,16 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br  px-4 py-10">
+      <Heading />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8 flex justify-between items-center">
-          <div>
+          {/* <div>
             <h1 className="text-3xl font-extrabold text-green-700 mb-2">
               POSCO International 관리자 대시보드
             </h1>
             <p className="text-gray-600">수행 업무 조사 데이터 분석</p>
-          </div>
+          </div> */}
           <button className="bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-lg hover:bg-green-800 transition">
             <Download className="w-4 h-4" />
             데이터 내보내기

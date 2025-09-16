@@ -8,13 +8,22 @@ import FormResponse from "../models/formResponse.model.js";
  */
 export const generateFormLink = async (req, res) => {
   try {
-    const linkId = crypto.randomBytes(16).toString("hex");
+    // 🔁 Reset all users
+    await User.updateMany({}, {
+      $set: {
+        password: null,
+        firstLogin: true,
+        formSubmitted: false
+      }
+    });
 
+    // 🔑 Generate new link
+    const linkId = crypto.randomBytes(16).toString("hex");
     const newLink = await FormLink.create({ linkId });
 
     res.status(201).json({
       success: true,
-      message: "Form link generated successfully",
+      message: "Form link generated successfully. All users have been reset.",
       link: `https://yourfrontend.com/form/${linkId}`,
       linkId: newLink.linkId
     });
@@ -132,5 +141,38 @@ export const deleteResponse = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+export const sendFormInvites = async (req, res) => {
+  try {
+    const { subject, message, formLink } = req.body;
+
+    if (!subject || !message || !formLink) {
+      return res.status(400).json({ error: "All fields are required." });
+    }
+
+    const users = await User.find({ email: /@(outlook|hotmail)\.com$/i });
+
+    if (users.length === 0) {
+      return res.status(404).json({ error: "No Outlook users found." });
+    }
+
+    // Send emails in parallel
+    await Promise.all(
+      users.map((user) =>
+        sendEmail(
+          user.email,
+          subject,
+          `${message}\n\nForm Link: ${formLink}`,
+          `<p>${message}</p><p><a href="${formLink}">${formLink}</a></p>`
+        )
+      )
+    );
+
+    res.json({ message: "Emails sent successfully." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to send emails." });
   }
 };

@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { Building2, Users, Layers } from "lucide-react";
+import { Building2, Users, Layers, ChevronDown, Award } from "lucide-react";
 import Heading from "./Heading";
 
 export default function Home() {
@@ -66,19 +67,19 @@ export default function Home() {
   const [selectedDept, setSelectedDept] = useState(options[headOptions[0]][0]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-100 via-white to-green-50 flex flex-col items-center px-4 py-10">
+    <div className="min-h-screen bg-gradient-to-br from-green-100 via-white to-green-50 flex flex-col items-center px-6 py-12">
       <Heading />
 
-      <div className="backdrop-blur-xl bg-white/80 shadow-2xl rounded-2xl p-10 max-w-3xl w-full border border-gray-200">
+      <div className="backdrop-blur-xl rounded-2xl p-12 max-w-4xl w-full">
         {/* Section Header */}
-        <h2 className="text-xl font-semibold text-green-700 mb-4">
+        <h2 className="text-2xl font-semibold text-green-700 mb-6">
           [조사 개요]
         </h2>
 
         {/* Description */}
-        <div className="text-gray-700 text-sm leading-relaxed space-y-3 mb-8">
+        <div className="text-gray-700 text-lg leading-relaxed space-y-3 mb-10">
           <p>
-            이번 조사는 근무시간 중 업무 활용 현황을 파악하기 위한 것입니다.
+            이번 조사는 근무시간 중 업무 활용 현황을 파악하기 위한 것입니다. <br />
             특히 회의·보고 활동이 실제로 얼마나 시간을 차지하는지 확인하고,
             앞으로 더 효율적인 근무 방식을 설계하기 위한 기초 자료로 활용됩니다.
           </p>
@@ -100,83 +101,94 @@ export default function Home() {
           </ul>
         </div>
 
-        {/* Form */}
-        <form className="space-y-6">
+        <form className="space-y-8">
           {/* Question 1 */}
           <div>
-            <label className="block text-sm font-medium text-gray-800 mb-2 flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-green-600" />* 1. 소속 본부
-              선택
+            <label className="block text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
+              <Building2 className="w-6 h-6 text-green-600" />
+              1. 소속 본부 선택 *
             </label>
-            <select
-              value={selectedHead}
-              onChange={(e) => {
-                const newHead = e.target.value;
-                setSelectedHead(newHead);
-                setSelectedDept(options[newHead][0]);
-              }}
-              className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white shadow-sm transition"
-            >
-              {headOptions.map((head) => (
-                <option key={head} value={head}>
-                  {head}
-                </option>
-              ))}
-            </select>
+            <div className="relative w-full md:w-3/5">
+              <select
+                value={selectedHead}
+                onChange={(e) => {
+                  const newHead = e.target.value;
+                  setSelectedHead(newHead);
+                  setSelectedDept(options[newHead][0]);
+                }}
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-md pr-10 focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white shadow-sm transition appearance-none"
+              >
+                {headOptions.map((head) => (
+                  <option key={head} value={head}>
+                    {head}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
+            </div>
           </div>
 
           {/* Question 2 */}
           <div>
-            <label className="block text-sm font-medium text-gray-800 mb-2 flex items-center gap-2">
-              <Users className="w-5 h-5 text-green-600" />* 2. 소속 실 선택
+            <label className="block text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
+              <Users className="w-6 h-6 text-green-600" />
+              2. 소속 실 선택 *
             </label>
-            <select
-              value={selectedDept}
-              onChange={(e) => setSelectedDept(e.target.value)}
-              className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white shadow-sm transition"
-            >
-              {options[selectedHead].map((dept) => (
-                <option key={dept} value={dept}>
-                  {dept}
-                </option>
-              ))}
-            </select>
+            <div className="relative w-full md:w-3/5">
+              <select
+                value={selectedDept}
+                onChange={(e) => setSelectedDept(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-md pr-10 focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white shadow-sm transition appearance-none"
+              >
+                {options[selectedHead].map((dept) => (
+                  <option key={dept} value={dept}>
+                    {dept}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
+            </div>
           </div>
 
           {/* Question 3 */}
           <div>
-            <label className="block text-sm font-medium text-gray-800 mb-2 flex items-center gap-2">
-              <Layers className="w-5 h-5 text-green-600" />* 3. 그룹
+            <label className="block text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
+              <Layers className="w-6 h-6 text-green-600" />
+              3. 그룹 *
             </label>
             <input
               type="text"
               placeholder="소속 그룹명 입력"
-              className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white shadow-sm transition"
+              className="w-full md:w-3/5 border border-gray-300 rounded-lg px-4 py-3 text-md focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white shadow-sm transition"
             />
           </div>
 
           {/* Question 4 */}
           <div>
-            <label className="block text-sm font-medium text-gray-800 mb-2">
-              * 4.직급 선택(주무의 경우 주무 선택)
+            <label className="block text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
+              <Award className="w-6 h-6 text-green-600" />
+              4. 직급 선택(주무의 경우 주무 선택) *
             </label>
-            <select
-              defaultValue={levelOptions[0]}
-              className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white shadow-sm transition"
-            >
-              {levelOptions.map((level) => (
-                <option key={level} value={level}>
-                  {level}
-                </option>
-              ))}
-            </select>
+            <div className="relative w-full md:w-3/5">
+              <select
+                defaultValue={levelOptions[0]}
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-md pr-10 focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white shadow-sm transition appearance-none"
+              >
+                {levelOptions.map((level) => (
+                  <option key={level} value={level}>
+                    {level}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
+            </div>
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-center pt-4">
+          <div className="flex justify-center pt-6">
             <button
               type="submit"
-              className="bg-gradient-to-r from-green-700 to-green-500 text-white font-semibold px-12 py-3 rounded-xl shadow-lg hover:shadow-xl transition transform hover:scale-[1.05]"
+              className="bg-gradient-to-r from-green-700 to-green-500 text-white font-semibold px-16 py-4 rounded-xl shadow-lg hover:shadow-xl transition transform hover:scale-[1.05] text-lg"
             >
               다음
             </button>
