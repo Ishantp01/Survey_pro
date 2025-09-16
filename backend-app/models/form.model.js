@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
 
-const formSchema = new mongoose.Schema({
-  formId: { type: String, unique: true, required: true },
-  createdAt: { type: Date, default: Date.now },
-  isActive: { type: Boolean, default: true }
+const formLinkSchema = new mongoose.Schema({
+  linkId: { type: String, required: true, unique: true },
+  isUsed: { type: Boolean, default: false },
+  usedAt: { type: Date },
+  createdAt: { type: Date, default: Date.now }
 });
 
-export default mongoose.model("Form", formSchema);
+export default mongoose.model("FormLink", formLinkSchema);
