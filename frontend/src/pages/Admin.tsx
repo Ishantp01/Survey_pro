@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { BarChart3, Calendar, Filter, Download } from "lucide-react";
 import Heading from "../components/Heading";
+import { apiFetch } from "../utils/api";
+import { Link } from "react-router-dom";
 
-// Define TypeScript types for survey data
 type TaskOption =
   | "업무 1만 수행"
   | "영업/직무 관련 업무수행"
@@ -11,11 +12,11 @@ type TaskOption =
   | "회의·보고 참석"
   | "재무/정산/결산 업무"
   | "교육 참여"
-  | string; // For "기타" with free-text input
+  | string;
 
 type SurveyEntry = {
-  date: string; // e.g., "2025-09-18"
-  timeInterval: string; // e.g., "07:00-07:30"
+  date: string;
+  timeInterval: string;
   task1: TaskOption;
   task2: TaskOption;
 };
@@ -69,19 +70,7 @@ const mockData: Record<TimeRangeKey, TimeRangeData> = {
   },
 };
 
-// Generate 30-minute time intervals from 07:00 to 22:00
-const timeIntervals = (() => {
-  const intervals: string[] = [];
-  for (let hour = 7; hour < 22; hour++) {
-    intervals.push(
-      `${hour.toString().padStart(2, "0")}:00-${hour
-        .toString()
-        .padStart(2, "0")}:30`
-    );
-    intervals.push(`${hour.toString().padStart(2, "0")}:30-${hour + 1}:00`);
-  }
-  return intervals;
-})();
+// (unused) Example generator for 30-minute time intervals
 
 // Working days from Sep 18 to Oct 2, excluding weekends
 const workingDays = [
@@ -103,13 +92,58 @@ export default function Admin() {
   const [dateRange, setDateRange] = useState<string>("all");
   const [deptFilter, setDeptFilter] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
-  const [surveyData, setSurveyData] = useState<SurveyEntry[]>(
+  const [surveyData] = useState<SurveyEntry[]>(
     mockData.surveyPeriod.surveyEntries
   );
+  const [slots, setSlots] = useState([
+    { timeRange: "07:00-07:30", activity1: "", activity2: "" },
+    { timeRange: "07:30-08:00", activity1: "", activity2: "" },
+    { timeRange: "08:00-08:30", activity1: "", activity2: "" },
+    { timeRange: "08:30-09:00", activity1: "", activity2: "" },
+    { timeRange: "09:00-09:30", activity1: "", activity2: "" },
+  ] as { timeRange: string; activity1: string; activity2: string }[]);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitResult, setSubmitResult] = useState<any>(null);
 
   const data = mockData[activeTab];
 
   const toggleFilters = () => setShowFilters(!showFilters);
+
+  const updateSlot = (
+    idx: number,
+    field: "activity1" | "activity2",
+    value: string
+  ) => {
+    setSlots((prev) => {
+      const next = [...prev];
+      next[idx] = { ...next[idx], [field]: value };
+      return next;
+    });
+  };
+
+  const submitTimeslots = async () => {
+    setSubmitError(null);
+    setSubmitResult(null);
+    setSubmitLoading(true);
+    try {
+      const res = await apiFetch(`/api/timeslot/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slots }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setSubmitError(data.message || "제출 실패");
+      } else {
+        setSubmitResult(data);
+      }
+    } catch (e: any) {
+      setSubmitError(e.message || "네트워크 오류");
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
 
   // Backend integration placeholder
   useEffect(() => {
@@ -278,6 +312,77 @@ export default function Admin() {
           <p className="text-2xl font-extrabold text-green-700">
             {data.topDept}
           </p>
+        </div>
+
+        {/* Timeslot Submission */}
+        <div className="bg-white shadow-xl rounded-xl p-6 border border-gray-100 mb-8">
+          <h3 className="text-lg font-semibold text-green-600 mb-4">
+            타임슬롯 제출
+          </h3>
+          <div className="space-y-4">
+            {slots.map((s, idx) => (
+              <div
+                key={s.timeRange}
+                className="grid grid-cols-1 md:grid-cols-3 gap-3"
+              >
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">
+                    시간
+                  </label>
+                  <input
+                    readOnly
+                    value={s.timeRange}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-gray-50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">
+                    업무 1
+                  </label>
+                  <input
+                    value={s.activity1}
+                    onChange={(e) =>
+                      updateSlot(idx, "activity1", e.target.value)
+                    }
+                    placeholder="업무 1 입력"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">
+                    업무 2
+                  </label>
+                  <input
+                    value={s.activity2}
+                    onChange={(e) =>
+                      updateSlot(idx, "activity2", e.target.value)
+                    }
+                    placeholder="업무 2 입력"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
+            ))}
+            <div className="flex gap-3">
+              <button
+                onClick={submitTimeslots}
+                disabled={submitLoading}
+                className="bg-green-700 text-white px-4 py-2 rounded-lg shadow disabled:opacity-60"
+              >
+                {submitLoading ? "제출 중..." : "제출"}
+              </button>
+              {submitError && (
+                <div className="text-red-600 text-sm self-center">
+                  {submitError}
+                </div>
+              )}
+            </div>
+            {submitResult && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-sm text-green-800">
+                제출 성공. 제출 ID: {submitResult.submission?._id}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Table Section */}
