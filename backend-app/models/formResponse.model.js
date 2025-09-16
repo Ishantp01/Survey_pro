@@ -6,6 +6,7 @@ const formResponseSchema = new mongoose.Schema({
   division: String,
   group: String,
   position: String,
+  email: { type: String, required: true }, // ✅ user email
   submittedAt: { type: Date, default: Date.now }
 });
 
