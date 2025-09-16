@@ -4,8 +4,8 @@ import FormResponse from "../models/formResponse.model.js";
 import userModel from "../models/user.model.js";
 
 /**
- * @desc Generate a unique form link
- * @route POST /api/form/generate
+ * @desc
+ * @route
  */
 export const generateFormLink = async (req, res) => {
   try {
