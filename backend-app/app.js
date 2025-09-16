@@ -15,7 +15,7 @@ app.use(helmet());
 
 // CORS (allow frontend dev server)
 app.use((req, res, next) => {
-  const origin = process.env.CORS_ORIGIN || "http://localhost:5173";
+  const origin = "*";
   res.header("Access-Control-Allow-Origin", origin === "*" ? "*" : origin);
   res.header("Vary", "Origin");
   res.header(
