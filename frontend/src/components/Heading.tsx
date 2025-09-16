@@ -1,10 +1,9 @@
 import { motion } from "framer-motion";
-import { Briefcase } from "lucide-react"; // simple icon
+import { Briefcase } from "lucide-react";
 
 function Heading() {
   return (
     <div className="text-center mb-12">
-      {/* Title */}
       <motion.h1
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -14,7 +13,6 @@ function Heading() {
         POSCO International
       </motion.h1>
 
-      {/* Subtitle with icon */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
@@ -27,7 +25,6 @@ function Heading() {
         </p>
       </motion.div>
 
-      {/* Decorative underline */}
       <motion.div
         initial={{ width: 0 }}
         animate={{ width: "120px" }}
