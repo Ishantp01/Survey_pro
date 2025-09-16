@@ -5,7 +5,8 @@ import {
   getFormStructure,
   submitForm,
   getAllResponses,
-  deleteResponse
+  deleteResponse,
+  sendFormInvites
 } from "../controllers/form.controller.js";
 
 const router = express.Router();
@@ -15,5 +16,6 @@ router.get("/:linkId", getFormStructure);
 router.post("/:linkId/submit", submitForm);
 router.get("/responses/all", getAllResponses);
 router.delete("/responses/:id", deleteResponse);
+router.post("/send-invites", sendFormInvites);
 
 export default router;
