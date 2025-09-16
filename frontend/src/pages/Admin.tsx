@@ -33,40 +33,11 @@ type TimeRangeKey = "surveyPeriod";
 
 const mockData: Record<TimeRangeKey, TimeRangeData> = {
   surveyPeriod: {
-    totalSubmissions: 450,
-    avgTimeSpent: "14m 10s",
-    completionRate: "90%",
+    totalSubmissions: 5,
+    avgTimeSpent: "30m 0s",
+    completionRate: "100%",
     topDept: "본부 A",
-    surveyEntries: [
-      // Sample data for Sep 18, 2025
-      {
-        date: "2025-09-18",
-        timeInterval: "07:00-07:30",
-        task1: "영업/직무 관련 업무수행",
-        task2: "업무 1만 수행",
-      },
-      {
-        date: "2025-09-18",
-        timeInterval: "07:30-08:00",
-        task1: "업무 관련 커뮤니케이션(메일, 메신저, 전화 등)",
-        task2: "기타: 팀 회의 준비",
-      },
-      {
-        date: "2025-09-18",
-        timeInterval: "21:30-22:00",
-        task1: "회의·보고 자료 작성",
-        task2: "회의·보고 참석",
-      },
-      // Sample data for Sep 19, 2025
-      {
-        date: "2025-09-19",
-        timeInterval: "07:00-07:30",
-        task1: "교육 참여",
-        task2: "업무 1만 수행",
-      },
-      // Add more entries as needed for other dates and intervals
-      // In a real app, this would come from the backend
-    ],
+    surveyEntries: [],
   },
 };
 
@@ -92,9 +63,38 @@ export default function Admin() {
   const [dateRange, setDateRange] = useState<string>("all");
   const [deptFilter, setDeptFilter] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
-  const [surveyData] = useState<SurveyEntry[]>(
-    mockData.surveyPeriod.surveyEntries
-  );
+  const [surveyData] = useState<SurveyEntry[]>([
+    {
+      date: "2025-01-16",
+      timeInterval: "07:00-07:30",
+      task1: "출근 준비",
+      task2: "아침 식사",
+    },
+    {
+      date: "2025-01-16",
+      timeInterval: "07:30-08:00",
+      task1: "이메일 확인",
+      task2: "업무 계획",
+    },
+    {
+      date: "2025-01-16",
+      timeInterval: "08:00-08:30",
+      task1: "팀 미팅",
+      task2: "자료 준비",
+    },
+    {
+      date: "2025-01-16",
+      timeInterval: "08:30-09:00",
+      task1: "보고 작성",
+      task2: "상사 검토",
+    },
+    {
+      date: "2025-01-16",
+      timeInterval: "09:00-09:30",
+      task1: "회의 참석",
+      task2: "메모 기록",
+    },
+  ]);
   const [slots, setSlots] = useState([
     { timeRange: "07:00-07:30", activity1: "", activity2: "" },
     { timeRange: "07:30-08:00", activity1: "", activity2: "" },
@@ -145,6 +145,39 @@ export default function Admin() {
     }
   };
 
+  const exportToCSV = () => {
+    if (filteredData.length === 0) {
+      alert("내보낼 데이터가 없습니다.");
+      return;
+    }
+
+    const headers = ["날짜", "시간", "업무 1", "업무 2"];
+    const csvContent = [
+      headers.join(","),
+      ...filteredData.map((entry) =>
+        [
+          entry.date,
+          entry.timeInterval,
+          `"${entry.task1}"`,
+          `"${entry.task2}"`,
+        ].join(",")
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `survey_data_${new Date().toISOString().split("T")[0]}.csv`
+    );
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Backend integration placeholder
   useEffect(() => {
     // Fetch survey data from backend
@@ -193,7 +226,10 @@ export default function Admin() {
             </h1>
             <p className="text-gray-600">수행 업무 조사 데이터 분석</p>
           </div>
-          <button className="bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-lg hover:bg-green-800 transition">
+          <button
+            onClick={exportToCSV}
+            className="bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-lg hover:bg-green-800 transition"
+          >
             <Download className="w-4 h-4" />
             데이터 내보내기
           </button>
