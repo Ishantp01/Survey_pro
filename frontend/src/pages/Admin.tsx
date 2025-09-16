@@ -145,6 +145,12 @@ export default function Admin() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-white px-4 py-10">
       <Heading />
       <div className="max-w-7xl mx-auto">
+        <Link to={"/generate-form-link"}>
+          {" "}
+          <button className="bg-green-600 p-2 font-bold text-lg rounded-xl px-3 mb-10 justify-end flex">
+            Generate form Link
+          </button>
+        </Link>
         {/* Header */}
         <div className="mb-8 flex justify-between items-center">
           <div>
