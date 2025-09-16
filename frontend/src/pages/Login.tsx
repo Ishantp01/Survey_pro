@@ -1,22 +1,31 @@
-import React from "react";
-import { User, Lock } from "lucide-react"; // icons for username and password
+import React, { useState } from "react";
+import { User, Lock } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { useLocation } from "react-router-dom";
+import Heading from "../components/Heading";
 
 export default function Login() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-white flex justify-center items-center px-4 py-10">
-      <div className="bg-white shadow-2xl rounded-2xl p-10 max-w-3xl w-full border border-gray-100">
-        {/* Title */}
-        <h1 className="text-3xl font-extrabold text-green-700 mb-4 text-center">
-          POSCO International 로그인
-        </h1>
+  const { login } = useAuth();
+  const location = useLocation();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
+  const onSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+    const token = "demo-token";
+    login(token);
+  };
+  return (
+    <div className="min-h-screen flex-col bg-gradient-to-br from-green-50 to-white flex justify-center items-center px-4 py-10">
+      <Heading />
+      <div className="bg-white shadow-2xl rounded-2xl p-10 max-w-3xl w-full border border-gray-100">
         {/* Description */}
         <div className="text-gray-700 text-sm leading-relaxed mb-8 text-center">
           <p></p>
         </div>
 
         {/* Form */}
-        <form className="space-y-6">
+        <form className="space-y-6" onSubmit={onSubmit}>
           {/* Username Field */}
           <div>
             <label className="block text-sm font-medium text-gray-800 mb-2 flex items-center gap-2">
@@ -24,9 +33,12 @@ export default function Login() {
               "조사 관련 안내 메일을 받으신 이메일 주소를 입력해
               주세요(예:yoonk.lee@poscointl.com)"
             </label>
+
             <input
               type="text"
               placeholder="ID를 입력해 주세요"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white transition"
             />
           </div>
@@ -40,6 +52,8 @@ export default function Login() {
             <input
               type="password"
               placeholder="비밀번호를 입력해 주세요"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white transition"
             />
           </div>
