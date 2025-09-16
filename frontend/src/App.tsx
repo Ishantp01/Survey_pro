@@ -1,9 +1,16 @@
-import React from 'react'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+
 
 function App() {
   return (
-    <div className='text-amber-950'>App</div>
-  )
+    <>
+      <Routes>
+        <Route path="/" element={<Home />} />   
+      </Routes>
+    
+    </>
+  );
 }
 
-export default App
+export default App;
