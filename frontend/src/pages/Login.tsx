@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { User, Lock } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import Heading from "../components/Heading";
+import { apiFetch } from "../utils/api";
 
 export default function Login() {
   const { login } = useAuth();
@@ -20,7 +21,7 @@ export default function Login() {
         setError("이메일과 비밀번호를 입력해 주세요");
         return;
       }
-      const res = await fetch(`/api/users/login`, {
+      const res = await apiFetch(`/api/users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
