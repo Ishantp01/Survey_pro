@@ -21,15 +21,20 @@ export const login = async (req, res) => {
       return res.json({
         success: true,
         message: "Password set successfully. Logged in.",
-        token: jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" }),
+        token: jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+          expiresIn: "1d",
+        }),
       });
     }
 
     // Case 2: Normal login
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    if (!isMatch)
+      return res.status(400).json({ message: "Invalid credentials" });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
 
     res.status(420).json({ success: true, message: "Login successful", token });
   } catch (err) {

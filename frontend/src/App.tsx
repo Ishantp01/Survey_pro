@@ -3,6 +3,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Generateform from "./pages/Generateform";
 
 function App() {
   return (
@@ -14,6 +15,15 @@ function App() {
             <ProtectedRoute>
               <Home />
             </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/generate-form-link"
+          element={
+            // <ProtectedRoute>
+            //   <Generateform />
+            // </ProtectedRoute>
+            <Generateform />
           }
         />
         <Route path="/login" element={<Login />} />

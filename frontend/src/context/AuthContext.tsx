@@ -5,24 +5,26 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 type AuthContextValue = {
   isAuthenticated: boolean;
   login: (token?: string) => void;
   logout: () => void;
+  isReady: boolean;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isReady, setIsReady] = useState<boolean>(false);
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
     const saved = localStorage.getItem("auth_token");
     setIsAuthenticated(Boolean(saved));
+    setIsReady(true);
   }, []);
 
   const login = (token?: string) => {
@@ -32,8 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("auth_token", "dummy");
     }
     setIsAuthenticated(true);
-    const redirectTo = (location.state as any)?.from || "/";
-    navigate(redirectTo, { replace: true });
+    navigate("/", { replace: true });
   };
 
   const logout = () => {
@@ -43,8 +44,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const value = useMemo(
-    () => ({ isAuthenticated, login, logout }),
-    [isAuthenticated]
+    () => ({ isAuthenticated, login, logout, isReady }),
+    [isAuthenticated, isReady]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

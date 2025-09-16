@@ -8,21 +8,23 @@ export const submitTimeSlots = async (req, res) => {
     const { slots } = req.body;
 
     if (!slots || !Array.isArray(slots) || slots.length === 0) {
-      return res.status(400).json({ success: false, message: "Slots are required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Slots are required" });
     }
 
     for (const slot of slots) {
       if (!slot.timeRange || !slot.activity1 || !slot.activity2) {
         return res.status(400).json({
           success: false,
-          message: "Each slot must have timeRange, activity1, and activity2"
+          message: "Each slot must have timeRange, activity1, and activity2",
         });
       }
     }
 
     const submission = await TimeSlotSubmission.create({
       userEmail,
-      slots
+      slots,
     });
 
     res.status(201).json({ success: true, submission });
@@ -35,7 +37,9 @@ export const submitTimeSlots = async (req, res) => {
 // Get all submissions
 export const getAllTimeSlots = async (req, res) => {
   try {
-    const submissions = await TimeSlotSubmission.find().sort({ submittedAt: -1 });
+    const submissions = await TimeSlotSubmission.find().sort({
+      submittedAt: -1,
+    });
     res.json({ success: true, submissions });
   } catch (error) {
     console.error("Get timeslots error:", error);
@@ -50,7 +54,8 @@ export const getMySubmission = async (req, res) => {
     if (!email) return res.status(401).json({ error: "Unauthorized" });
 
     const submission = await TimeSlotSubmission.findOne({ userEmail: email });
-    if (!submission) return res.status(404).json({ error: "No submission found" });
+    if (!submission)
+      return res.status(404).json({ error: "No submission found" });
 
     res.json(submission);
   } catch (error) {
@@ -63,7 +68,8 @@ export const deleteTimeSlotSubmission = async (req, res) => {
   try {
     const { id } = req.params;
     const deleted = await TimeSlotSubmission.findByIdAndDelete(id);
-    if (!deleted) return res.status(404).json({ error: "Submission not found" });
+    if (!deleted)
+      return res.status(404).json({ error: "Submission not found" });
     res.json({ message: "Submission deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: "Failed to delete submission" });
