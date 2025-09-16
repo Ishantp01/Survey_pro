@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { User, Lock } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { useLocation } from "react-router-dom";
 import Heading from "../components/Heading";
 
 export default function Login() {
   const { login } = useAuth();
-  const location = useLocation();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
