@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(helmet());
 
 app.use((req, res, next) => {
-  const origin = "*";
+  const origin = "https://survey-pro-livid.vercel.app";
   res.header("Access-Control-Allow-Origin", origin === "*" ? "*" : origin);
   res.header("Vary", "Origin");
   res.header(
