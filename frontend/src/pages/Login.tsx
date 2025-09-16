@@ -17,6 +17,10 @@ export default function Login() {
     setError(null);
     setLoading(true);
     try {
+      if (!email || !password) {
+        setError("이메일과 비밀번호를 입력해 주세요");
+        return;
+      }
       const res = await fetch(`/api/users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
