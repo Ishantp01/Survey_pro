@@ -26,13 +26,17 @@ export default function Login() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      if (res.status === 420) {
-        const data = await res.json();
-        login(data.token);
+      const data = await res.json().catch(() => ({}));
+      // Treat custom 420 success or standard 2xx success with { success: true }
+      if (res.status === 420 || (res.ok && data && data.success)) {
+        if (data && data.token) {
+          login(data.token);
+        } else {
+          setError("Unexpected response from server");
+        }
         return;
       }
-      const fail = await res.json().catch(() => ({ message: "Login failed" }));
-      setError(fail.message || "Login failed");
+      setError((data && data.message) || "Login failed");
     } catch (err: any) {
       setError(err.message || "Network error");
     } finally {
