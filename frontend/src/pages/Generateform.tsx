@@ -20,44 +20,47 @@ const GenerateForm: React.FC = () => {
     if (savedFormLink) setFormLink(savedFormLink);
   }, []);
 
-const generateFormLink = async () => {
-  const confirmed = window.confirm(
-    "⚠️ Are you sure? Generating a new link will reset all users!"
-  );
-  if (!confirmed) return;
+  const generateFormLink = async () => {
+    const confirmed = window.confirm(
+      "⚠️ Are you sure? Generating a new link will reset all users!"
+    );
+    if (!confirmed) return;
 
-  try {
-    setLoading(true);
-    const res = await axios.post("http://localhost:5000/api/form/generate", {});
-    if (res.data.success) {
-      const formLinkFromBackend = res.data.link;
-      setFormLink(formLinkFromBackend);
+    try {
+      setLoading(true);
+      const res = await axios.post(
+        "http://localhost:5000/api/form/generate",
+        {}
+      );
+      if (res.data.success) {
+        const formLinkFromBackend = res.data.link;
+        setFormLink(formLinkFromBackend);
 
-      // 🔹 Extract formId from the URL
-      const extractedFormId = formLinkFromBackend.split("/").pop() || "";
-      setFormId(extractedFormId);
+        // 🔹 Extract formId from the URL
+        const extractedFormId = formLinkFromBackend.split("/").pop() || "";
+        setFormId(extractedFormId);
 
-      // 🔹 Save both in localStorage
-      localStorage.setItem("formLink", formLinkFromBackend);
-      localStorage.setItem("formId", extractedFormId);
+        // 🔹 Save both in localStorage
+        localStorage.setItem("formLink", formLinkFromBackend);
+        localStorage.setItem("formId", extractedFormId);
 
-      toast.success("✅ Form link generated successfully! You will be logged out now.");
-      
-      // 🔹 Logout user immediately after generating form link
-      setTimeout(() => {
-        logout(); // Use AuthContext logout method for proper cleanup
-      }, 2000); // Give user time to see the success message
-    } else {
-      toast.error("❌ Failed to generate form link");
+        toast.success(
+          "✅ Form link generated successfully! You will be logged out now."
+        );
+
+        // 🔹 Logout user immediately after generating form link
+        setTimeout(() => {
+          logout(); // Use AuthContext logout method for proper cleanup
+        }, 2000); // Give user time to see the success message
+      } else {
+        toast.error("❌ Failed to generate form link");
+      }
+    } catch {
+      toast.error("❌ Error generating form link");
+    } finally {
+      setLoading(false);
     }
-  } catch {
-    toast.error("❌ Error generating form link");
-  } finally {
-    setLoading(false);
-  }
-};
-
-
+  };
 
   // 🔹 Send Invites
   const sendFormInvites = async () => {
@@ -67,10 +70,12 @@ const generateFormLink = async () => {
     }
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:5000/api/form/send-invites", {
-        subject: "회의·보고 문화 개선 프로젝트 설문 안내",
-        formLink,
-      });
+      const res = await axios.post(
+        "http://localhost:5000/api/form/send-invites",
+        {
+          formLink,
+        }
+      );
       if (res.data.message) toast.success(res.data.message);
       else toast.error("❌ Failed to send invites");
     } catch {
@@ -87,12 +92,16 @@ const generateFormLink = async () => {
       return;
     }
 
-    const confirmed = window.confirm("⚠️ Are you sure you want to delete this form?");
+    const confirmed = window.confirm(
+      "⚠️ Are you sure you want to delete this form?"
+    );
     if (!confirmed) return;
 
     try {
       setLoading(true);
-      const res = await axios.delete(`http://localhost:5000/api/form/responses/${formId}`);
+      const res = await axios.delete(
+        `http://localhost:5000/api/form/responses/${formId}`
+      );
       if (res.data.success) {
         setFormLink(null);
         setFormId(null);
