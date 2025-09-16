@@ -1,7 +1,7 @@
 import express from "express";
 import {
   submitTimeSlots,
-  getAllTimeSlotSubmissions,
+  getAllTimeSlots,
   getMySubmission,
   deleteTimeSlotSubmission
 } from "../controllers/timeslotController.js";
@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post("/submit",protect, submitTimeSlots);
 router.get("/me", protect, getMySubmission);
-router.get("/all", getAllTimeSlotSubmissions); // Admin can protect this separately
+router.get("/all", getAllTimeSlots); // Admin can protect this separately
 router.delete("/:id", deleteTimeSlotSubmission);
 
 export default router;

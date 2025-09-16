@@ -1,45 +1,45 @@
 import TimeSlotSubmission from "../models/timeslot.js";
-import User from "../models/user.js";
+import User from "../models/user.model.js";
 
 // Submit timeslot form
 export const submitTimeSlots = async (req, res) => {
   try {
+    const userEmail = req.user.email; // from token
     const { slots } = req.body;
-    const email = req.user?.email; // <- email from token middleware
 
-    if (!email) {
-      return res.status(401).json({ error: "Unauthorized: email not found in token" });
+    if (!slots || !Array.isArray(slots) || slots.length === 0) {
+      return res.status(400).json({ success: false, message: "Slots are required" });
     }
 
-    if (!slots || !slots.length) {
-      return res.status(400).json({ error: "Slots are required" });
+    for (const slot of slots) {
+      if (!slot.timeRange || !slot.activity1 || !slot.activity2) {
+        return res.status(400).json({
+          success: false,
+          message: "Each slot must have timeRange, activity1, and activity2"
+        });
+      }
     }
 
-    // Save submission
-    const submission = new TimeSlotSubmission({ userEmail: email, slots });
-    await submission.save();
+    const submission = await TimeSlotSubmission.create({
+      userEmail,
+      slots
+    });
 
-    // Update user → mark as submitted
-    await User.findOneAndUpdate(
-      { email },
-      { formSubmitted: true },
-      { new: true }
-    );
-
-    res.json({ message: "Time slots submitted successfully", submission });
+    res.status(201).json({ success: true, submission });
   } catch (error) {
-    console.error("Error saving timeslot:", error);
-    res.status(500).json({ error: "Failed to save time slots" });
+    console.error("Submit error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
 // Get all submissions
-export const getAllTimeSlotSubmissions = async (req, res) => {
+export const getAllTimeSlots = async (req, res) => {
   try {
-    const submissions = await TimeSlotSubmission.find();
-    res.json(submissions);
+    const submissions = await TimeSlotSubmission.find().sort({ submittedAt: -1 });
+    res.json({ success: true, submissions });
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch submissions" });
+    console.error("Get timeslots error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
