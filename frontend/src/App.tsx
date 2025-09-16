@@ -1,23 +1,18 @@
-<<<<<<< HEAD
-import React from "react";
-
-function App() {
-  return <div className="text-amber-950">App</div>;
-=======
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
-
+import Login from "./pages/Login";
+import Admin from "./pages/Admin";
 
 function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Home />} />   
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
-    
     </>
   );
->>>>>>> 27203740a9c8fe58b8c3ff5574fb904908a19126
 }
 
 export default App;
