@@ -9,16 +9,39 @@ export default function Login() {
   const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const onSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+  const onSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    const token = "demo-token";
-    login(token);
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/users/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      if (res.status === 420) {
+        const data = await res.json();
+        login(data.token);
+        return;
+      }
+      const fail = await res.json().catch(() => ({ message: "Login failed" }));
+      setError(fail.message || "Login failed");
+    } catch (err: any) {
+      setError(err.message || "Network error");
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <div className="min-h-screen flex-col bg-gradient-to-br from-green-50 to-white flex justify-center items-center px-4 py-10">
       <Heading />
       <div className="bg-white shadow-2xl rounded-2xl p-10 max-w-3xl w-full border border-gray-100">
+        {error && (
+          <div className="mb-4 text-red-600 text-sm text-center">{error}</div>
+        )}
         {/* Description */}
         <div className="text-gray-700 text-sm leading-relaxed mb-8 text-center">
           <p></p>
@@ -62,9 +85,10 @@ export default function Login() {
           <div className="flex justify-center">
             <button
               type="submit"
-              className="bg-green-700 cursor-pointer text-white font-semibold px-10 py-3 rounded-lg shadow-lg hover:bg-green-800 transition transform hover:scale-[1.02]"
+              className="bg-green-700 cursor-pointer text-white font-semibold px-10 py-3 rounded-lg shadow-lg hover:bg-green-800 transition transform hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed"
+              disabled={loading}
             >
-              로그인
+              {loading ? "로그인 중..." : "로그인"}
             </button>
           </div>
         </form>
