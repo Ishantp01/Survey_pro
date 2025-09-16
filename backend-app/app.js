@@ -1,4 +1,3 @@
-// app.js
 import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
@@ -13,7 +12,6 @@ const app = express();
 app.use(express.json());
 app.use(helmet());
 
-// CORS (allow frontend dev server)
 app.use((req, res, next) => {
   const origin = "*";
   res.header("Access-Control-Allow-Origin", origin === "*" ? "*" : origin);
@@ -29,14 +27,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// connect DB (use env variable)
 connectDB(process.env.MONGO_URI);
 
-// mount routes
 app.use("/api/users", userRoutes);
 app.use("/api/form", formRoutes);
 
-// basic health check
 app.get("/", (req, res) => res.send("OK"));
 
 export default app;
