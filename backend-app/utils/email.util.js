@@ -1,17 +1,17 @@
 import nodemailer from "nodemailer";
 
-// Configure transporter
+// Configure transporter for Gmail
 const transporter = nodemailer.createTransport({
-  service: "Outlook",
+  service: "Gmail",
   auth: {
-    user: process.env.OUTLOOK_USER, // your outlook email
-    pass: process.env.OUTLOOK_PASS  // your outlook app password
+    user: "himankjanjire4@gmail.com", // your Gmail address
+    pass: "ziep qatb plrl pyfv"  // your Gmail App Password
   }
 });
 
 export const sendEmail = async (to, subject, text, html) => {
   const mailOptions = {
-    from: process.env.OUTLOOK_USER,
+    from: process.env.GMAIL_USER,
     to,
     subject,
     text,
