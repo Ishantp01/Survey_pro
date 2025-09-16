@@ -1,87 +1,152 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const GenerateForm: React.FC = () => {
-  const [loading, setLoading] = useState(false);
   const [formLink, setFormLink] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [formId, setFormId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const generateFormLink = async () => {
+  // 🔹 Load saved formId & formLink from localStorage on mount
+  useEffect(() => {
+    const savedFormId = localStorage.getItem("formId");
+    const savedFormLink = localStorage.getItem("formLink");
+    if (savedFormId) setFormId(savedFormId);
+    if (savedFormLink) setFormLink(savedFormLink);
+  }, []);
+
+const generateFormLink = async () => {
+  const confirmed = window.confirm(
+    "⚠️ Are you sure? Generating a new link will reset all users!"
+  );
+  if (!confirmed) return;
+
+  try {
     setLoading(true);
-    setError(null);
-    setMessage(null);
+    const res = await axios.post("http://localhost:5000/api/form/generate", {});
+    if (res.data.success) {
+      const formLinkFromBackend = res.data.link;
+      setFormLink(formLinkFromBackend);
 
+      // 🔹 Extract formId from the URL
+      const extractedFormId = formLinkFromBackend.split("/").pop() || "";
+      setFormId(extractedFormId);
+
+      // 🔹 Save both in localStorage
+      localStorage.setItem("formLink", formLinkFromBackend);
+      localStorage.setItem("formId", extractedFormId);
+
+      toast.success("✅ Form link generated successfully!");
+    } else {
+      toast.error("❌ Failed to generate form link");
+    }
+  } catch {
+    toast.error("❌ Error generating form link");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
+  // 🔹 Send Invites
+  const sendFormInvites = async () => {
+    if (!formLink) {
+      toast.error("⚠️ Please generate the link first!");
+      return;
+    }
     try {
-      const res = await axios.post("http://localhost:5000/api/form/generate");
-
-      if (res.data.success) {
-        setFormLink(res.data.link);
-        setMessage(res.data.message);
-      } else {
-        setError("Failed to generate form link");
-      }
-    } catch (err) {
-      setError("Something went wrong while generating the form link");
+      setLoading(true);
+      const res = await axios.post("http://localhost:5000/api/form/send-invites", {
+        subject: "회의·보고 문화 개선 프로젝트 설문 안내",
+        formLink,
+      });
+      if (res.data.message) toast.success(res.data.message);
+      else toast.error("❌ Failed to send invites");
+    } catch {
+      toast.error("❌ Error sending invites");
     } finally {
       setLoading(false);
     }
   };
 
-  const copyToClipboard = () => {
-    if (formLink) {
-      navigator.clipboard.writeText(formLink);
-      setMessage("Link copied to clipboard!");
+  // 🔹 Delete Form/Link
+  const deleteForm = async () => {
+    if (!formId) {
+      toast.error("⚠️ No form available to delete");
+      return;
+    }
+
+    const confirmed = window.confirm("⚠️ Are you sure you want to delete this form?");
+    if (!confirmed) return;
+
+    try {
+      setLoading(true);
+      const res = await axios.delete(`http://localhost:5000/api/form/responses/${formId}`);
+      if (res.data.success) {
+        setFormLink(null);
+        setFormId(null);
+
+        // Remove from localStorage
+        localStorage.removeItem("formLink");
+        localStorage.removeItem("formId");
+
+        toast.success(res.data.message || "✅ Form deleted successfully!");
+      } else {
+        toast.error("❌ Failed to delete form");
+      }
+    } catch {
+      toast.error("❌ Error deleting form");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50">
-      <div className="w-full max-w-lg p-6 bg-white rounded-2xl shadow-lg">
-        <h1 className="text-2xl font-bold text-center mb-6 text-green-700">
-          Generate Form Link
+    <div className="min-h-screen bg-gradient-to-r from-green-50 to-green-100 flex items-center justify-center p-4">
+      <div className="bg-white shadow-2xl rounded-3xl w-full max-w-2xl p-8">
+        <h1 className="text-3xl font-extrabold text-center text-green-700 mb-6 drop-shadow-md">
+          Form Manager
         </h1>
 
-        {/* Generate Button */}
-        <div className="flex justify-center mb-4">
+        {/* Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
           <button
             onClick={generateFormLink}
             disabled={loading}
-            className={`px-6 py-2 text-white font-medium rounded-lg transition ${
-              loading
-                ? "bg-green-400 cursor-not-allowed"
-                : "bg-green-600 hover:bg-green-700"
-            }`}
+            className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition duration-300 disabled:opacity-50"
           >
             {loading ? "Generating..." : "Generate Link"}
           </button>
+          <button
+            onClick={sendFormInvites}
+            disabled={!formLink || loading}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition duration-300 disabled:opacity-50"
+          >
+            {loading ? "Sending..." : "Send Invites"}
+          </button>
+          <button
+            onClick={deleteForm}
+            disabled={!formLink || loading}
+            className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition duration-300 disabled:opacity-50"
+          >
+            {loading ? "Deleting..." : "Delete Form"}
+          </button>
         </div>
 
-        {/* Success / Error Message */}
-        {message && (
-          <p className="text-green-600 text-center mb-4">{message}</p>
-        )}
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-
-        {/* Display Form Link */}
+        {/* Generated Form Link */}
         {formLink && (
-          <div className="mt-4">
-            <div className="flex items-center justify-between border rounded-lg p-3 bg-gray-100">
-              <a
-                href={formLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 underline truncate"
-              >
-                {formLink}
-              </a>
-              <button
-                onClick={copyToClipboard}
-                className="ml-3 px-3 py-1 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition"
-              >
-                Copy
-              </button>
-            </div>
+          <div className="bg-green-50 border-l-4 border-green-600 p-4 rounded-xl">
+            <p className="font-semibold text-green-700">Generated Form Link:</p>
+            <a
+              href={formLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline break-all"
+            >
+              {formLink}
+            </a>
           </div>
         )}
       </div>
