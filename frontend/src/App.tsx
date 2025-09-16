@@ -26,6 +26,15 @@ function App() {
             <Generateform />
           }
         />
+        {/* Form access route - requires authentication */}
+        <Route
+          path="/form/:linkId"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/login" element={<Login />} />
         <Route
           path="/admin"
