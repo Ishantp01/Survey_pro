@@ -1,5 +1,5 @@
 import TimeSlotSubmission from "../models/timeslot.js";
-import User from "../models/user.js";
+import User from "../models/user.model.js";
 
 // Submit timeslot form
 export const submitTimeSlots = async (req, res) => {
