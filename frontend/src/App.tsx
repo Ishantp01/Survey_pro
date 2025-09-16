@@ -20,9 +20,10 @@ function App() {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute>
-              <Admin />
-            </ProtectedRoute>
+            // <ProtectedRoute>
+            //   <Admin />
+            // </ProtectedRoute>
+            <Admin/ >
           }
         />
         <Route path="*" element={<Navigate to="/login" replace />} />
