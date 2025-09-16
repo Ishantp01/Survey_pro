@@ -71,11 +71,7 @@ export default function Home() {
 
       <div className="backdrop-blur-xl bg-white/80 shadow-2xl rounded-2xl p-10 max-w-3xl w-full border border-gray-200">
         {/* Section Header */}
-<<<<<<< HEAD
-        <h2 className="text-lg font-semibold text-green-600 mb-3">
-=======
         <h2 className="text-xl font-semibold text-green-700 mb-4">
->>>>>>> e4bbb1be02e208b9c3a696463d91d5decf1e99c0
           [조사 개요]
         </h2>
 
@@ -86,11 +82,7 @@ export default function Home() {
             특히 회의·보고 활동이 실제로 얼마나 시간을 차지하는지 확인하고,
             앞으로 더 효율적인 근무 방식을 설계하기 위한 기초 자료로 활용됩니다.
           </p>
-<<<<<<< HEAD
-          <ul className="list-disc list-inside space-y-1">
-=======
           <ul className="list-disc list-inside space-y-1 pl-2">
->>>>>>> e4bbb1be02e208b9c3a696463d91d5decf1e99c0
             <li>
               조사 기간: 2025년 9월 18일(목) ~ 10월 2일(목), 총 2주(10영업일)
             </li>
@@ -103,11 +95,7 @@ export default function Home() {
             </li>
             <li>
               여러분의 응답은 불필요한 업무를 줄이고, 회의·보고 문화를 개선하는
-<<<<<<< HEAD
-              중요한 근거가 됩니다.
-=======
               근거가 됩니다.
->>>>>>> e4bbb1be02e208b9c3a696463d91d5decf1e99c0
             </li>
           </ul>
         </div>
@@ -117,14 +105,8 @@ export default function Home() {
           {/* Question 1 */}
           <div>
             <label className="block text-sm font-medium text-gray-800 mb-2 flex items-center gap-2">
-<<<<<<< HEAD
-              <Building2 className="w-4 h-4 text-green-700" />* 1. 귀하의{" "}
-              <span className="text-green-700 font-semibold">소속 본부</span>를
-              선택해 주세요.
-=======
               <Building2 className="w-5 h-5 text-green-600" />* 1. 소속 본부
               선택
->>>>>>> e4bbb1be02e208b9c3a696463d91d5decf1e99c0
             </label>
             <select
               value={selectedHead}
@@ -146,13 +128,7 @@ export default function Home() {
           {/* Question 2 */}
           <div>
             <label className="block text-sm font-medium text-gray-800 mb-2 flex items-center gap-2">
-<<<<<<< HEAD
-              <Users className="w-4 h-4 text-green-700" />* 2. 귀하의{" "}
-              <span className="text-green-700 font-semibold">소속 실</span>을
-              선택해 주세요.
-=======
               <Users className="w-5 h-5 text-green-600" />* 2. 소속 실 선택
->>>>>>> e4bbb1be02e208b9c3a696463d91d5decf1e99c0
             </label>
             <select
               value={selectedDept}
@@ -170,13 +146,7 @@ export default function Home() {
           {/* Question 3 */}
           <div>
             <label className="block text-sm font-medium text-gray-800 mb-2 flex items-center gap-2">
-<<<<<<< HEAD
-              <Layers className="w-4 h-4 text-green-700" />* 3. 귀하의{" "}
-              <span className="text-green-700 font-semibold">소속 그룹</span>을
-              입력해 주세요.
-=======
               <Layers className="w-5 h-5 text-green-600" />* 3. 그룹
->>>>>>> e4bbb1be02e208b9c3a696463d91d5decf1e99c0
             </label>
             <input
               type="text"
