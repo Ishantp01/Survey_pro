@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import FormLink from "../models/form.model.js";
 import FormResponse from "../models/formResponse.model.js";
+import userModel from "../models/user.model.js";
 
 /**
  * @desc Generate a unique form link
@@ -9,7 +10,7 @@ import FormResponse from "../models/formResponse.model.js";
 export const generateFormLink = async (req, res) => {
   try {
     // 🔁 Reset all users
-    await User.updateMany({}, {
+    await userModel.updateMany({}, {
       $set: {
         password: null,
         firstLogin: true,
@@ -83,13 +84,16 @@ export const submitForm = async (req, res) => {
       return res.status(400).json({ success: false, message: "Form already submitted" });
     }
 
+        const userEmail = req.user.email;
+
     // Save response
     const response = await FormResponse.create({
       linkId,
       headquarters,
       division,
       group,
-      position
+      position,
+      email: userEmail,
     });
 
     // Mark link as used
