@@ -1,7 +1,9 @@
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
+import AdminLogin from "./pages/AdminLogin"; 
 import ProtectedRoute from "./components/ProtectedRoute";
 import Generateform from "./pages/Generateform";
 
@@ -17,6 +19,9 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+      
+
          <Route
           path="/generate-form-link"
           element={
@@ -35,14 +40,15 @@ function App() {
             </ProtectedRoute>
           }
         />
+
         <Route path="/login" element={<Login />} />
+        <Route path="/adminlogin" element={<AdminLogin />} />
         <Route
           path="/admin"
           element={
-            // <ProtectedRoute>
-            //   <Admin />
-            // </ProtectedRoute>
-            <Admin/ >
+            <ProtectedRoute requireAdmin={true}>
+              <Admin />
+            </ProtectedRoute>
           }
         />
         <Route path="*" element={<Navigate to="/login" replace />} />
