@@ -1,5 +1,4 @@
-export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://survey-pro-44pf.onrender.com";
+export const API_BASE_URL = "https://survey-pro-44pf.onrender.com";
 
 function buildHeaders(init?: RequestInit): HeadersInit {
   const base: Record<string, string> = {
