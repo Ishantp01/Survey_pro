@@ -1,0 +1,56 @@
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+
+type AuthContextValue = {
+  isAuthenticated: boolean;
+  login: (token?: string) => void;
+  logout: () => void;
+};
+
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const saved = localStorage.getItem("auth_token");
+    setIsAuthenticated(Boolean(saved));
+  }, []);
+
+  const login = (token?: string) => {
+    if (token) {
+      localStorage.setItem("auth_token", token);
+    } else {
+      localStorage.setItem("auth_token", "dummy");
+    }
+    setIsAuthenticated(true);
+    const redirectTo = (location.state as any)?.from || "/";
+    navigate(redirectTo, { replace: true });
+  };
+
+  const logout = () => {
+    localStorage.removeItem("auth_token");
+    setIsAuthenticated(false);
+    navigate("/login", { replace: true });
+  };
+
+  const value = useMemo(
+    () => ({ isAuthenticated, login, logout }),
+    [isAuthenticated]
+  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
+}
