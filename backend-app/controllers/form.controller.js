@@ -150,18 +150,23 @@ export const deleteResponse = async (req, res) => {
 
 export const sendFormInvites = async (req, res) => {
   try {
-    const { subject, formLink } = req.body;
+    const { formLink } = req.body;
 
-    if (!subject || !formLink) {
-      return res.status(400).json({ error: "Subject and form link are required." });
+    if (!formLink) {
+      return res.status(400).json({ error: "Form link is required." });
     }
 
+    // Find all Outlook or Hotmail users
     const users = await User.find({ email: /@(outlook|hotmail)\.com$/i });
 
     if (!users.length) {
       return res.status(404).json({ error: "No Outlook users found." });
     }
 
+    // Static subject
+    const subject = "[회의·보고 문화 개선 프로젝트] 업무시간 활용 조사 참여 안내";
+
+    // HTML Email Template
     const emailHtmlTemplate = (userEmail) => `
       <div style="font-family:Arial, sans-serif; line-height:1.6; color:#333;">
         <p>안녕하십니까.<br>
