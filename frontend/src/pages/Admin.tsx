@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { BarChart3, Calendar, Filter, Download } from "lucide-react";
 import Heading from "../components/Heading";
-
+import { Link } from "react-router-dom";
 // Define TypeScript types for mockData
 type SubmissionByHour = { hour: string; count: number };
 type SubmissionByDay = { day: string; count: number };
@@ -91,6 +91,7 @@ export default function Admin() {
     <div className="min-h-screen bg-gradient-to-br px-4 py-10">
       <Heading />
       <div className="max-w-7xl mx-auto">
+       < Link to={"/generate-form-link"} > <button className="bg-green-600 p-2 font-bold text-lg rounded-xl px-3 mb-10 justify-end flex">Generate form Link</button></Link>
         {/* Header */}
         <div className="mb-8 flex justify-between items-center">
           <div>
