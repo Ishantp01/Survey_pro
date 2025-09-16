@@ -11,18 +11,21 @@ type AuthContextValue = {
   isAuthenticated: boolean;
   login: (token?: string) => void;
   logout: () => void;
+  isReady: boolean;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isReady, setIsReady] = useState<boolean>(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     const saved = localStorage.getItem("auth_token");
     setIsAuthenticated(Boolean(saved));
+    setIsReady(true);
   }, []);
 
   const login = (token?: string) => {
@@ -43,8 +46,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const value = useMemo(
-    () => ({ isAuthenticated, login, logout }),
-    [isAuthenticated]
+    () => ({ isAuthenticated, login, logout, isReady }),
+    [isAuthenticated, isReady]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

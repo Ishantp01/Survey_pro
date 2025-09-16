@@ -1,8 +1,32 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { BarChart3, Calendar, Filter, Download } from "lucide-react";
 import Heading from "../components/Heading";
 
-const mockData = {
+// Define TypeScript types for mockData
+type SubmissionByHour = { hour: string; count: number };
+type SubmissionByDay = { day: string; count: number };
+
+type TimeRangeData =
+  | {
+      totalSubmissions: number;
+      avgTimeSpent: string;
+      completionRate: string;
+      topDept: string;
+      submissionsByHour: SubmissionByHour[];
+      submissionsByDay?: never;
+    }
+  | {
+      totalSubmissions: number;
+      avgTimeSpent: string;
+      completionRate: string;
+      topDept: string;
+      submissionsByDay: SubmissionByDay[];
+      submissionsByHour?: never;
+    };
+
+type TimeRangeKey = "last24h" | "lastWeek" | "last10Days";
+
+const mockData: Record<TimeRangeKey, TimeRangeData> = {
   last24h: {
     totalSubmissions: 45,
     avgTimeSpent: "12m 30s",
@@ -54,27 +78,27 @@ const mockData = {
 };
 
 export default function Admin() {
-  const [activeTab, setActiveTab] = useState("last24h");
-  const [dateRange, setDateRange] = useState("last24h");
+  const [activeTab, setActiveTab] = useState<TimeRangeKey>("last24h");
+  const [dateRange, setDateRange] = useState<TimeRangeKey>("last24h");
   const [deptFilter, setDeptFilter] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
 
-  const data = mockData[activeTab] || mockData.last24h;
+  const data = mockData[activeTab];
 
   const toggleFilters = () => setShowFilters(!showFilters);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br  px-4 py-10">
+    <div className="min-h-screen bg-gradient-to-br px-4 py-10">
       <Heading />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8 flex justify-between items-center">
-          {/* <div>
+          <div>
             <h1 className="text-3xl font-extrabold text-green-700 mb-2">
               POSCO International 관리자 대시보드
             </h1>
             <p className="text-gray-600">수행 업무 조사 데이터 분석</p>
-          </div> */}
+          </div>
           <button className="bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-lg hover:bg-green-800 transition">
             <Download className="w-4 h-4" />
             데이터 내보내기
@@ -104,8 +128,9 @@ export default function Admin() {
                 <select
                   value={dateRange}
                   onChange={(e) => {
-                    setDateRange(e.target.value);
-                    setActiveTab(e.target.value);
+                    const value = e.target.value as TimeRangeKey;
+                    setDateRange(value);
+                    setActiveTab(value);
                   }}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white transition"
                 >
@@ -253,16 +278,17 @@ export default function Admin() {
                 </tr>
               </thead>
               <tbody>
-                {data[
-                  activeTab === "last24h"
-                    ? "submissionsByHour"
-                    : "submissionsByDay"
-                ].map((item, index) => (
+                {(activeTab === "last24h"
+                  ? data.submissionsByHour
+                  : data.submissionsByDay
+                )?.map((item, index) => (
                   <tr
                     key={index}
                     className="border-b border-gray-200 hover:bg-gray-50"
                   >
-                    <td className="px-6 py-4">{item.hour || item.day}</td>
+                    <td className="px-6 py-4">
+                      {"hour" in item ? item.hour : item.day}
+                    </td>
                     <td className="px-6 py-4">{item.count}</td>
                   </tr>
                 ))}
