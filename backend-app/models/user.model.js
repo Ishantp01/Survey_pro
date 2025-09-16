@@ -1,15 +1,10 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
-  password: { type: String }, // will hold hashed temp password
-  status: {
-    type: String,
-    enum: ["NOT_REGISTERED", "REGISTERED"],
-    default: "NOT_REGISTERED"
-  },
-  formSubmitted: { type: Boolean, default: false }
+  email: { type: String, unique: true, required: true },
+  password: { type: String }, // empty until first login
+  firstLogin: { type: Boolean, default: true }, // true until password set
+  formSubmitted: { type: Boolean, default: false }, // reset each new form
 });
 
-const User = mongoose.model("User", userSchema);
-export default User;
+export default mongoose.model("User", userSchema);
