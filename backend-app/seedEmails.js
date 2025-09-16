@@ -7,8 +7,6 @@ dotenv.config();
 
 const emails = [
   "user1@company.com",
-  "user2@company.com",
-  "user3@company.com"
   // ... add all your eligible emails here
 ];
 
