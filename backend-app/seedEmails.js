@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import User from "./models/user.model.js";
-import connectDB from "./config/db.js";
 
 dotenv.config();
 
@@ -10,23 +9,28 @@ const emails = [
 
 ];
 
-const seedEmails = async () => {
+const seedUsers = async () => {
   try {
-    await connectDB();
+    await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
 
-    const emailDocs = emails.map(email => ({
+    const seedData = emails.map((email) => ({
       email,
-      status: "NOT_REGISTERED",
-      formSubmitted: false
+      password: null,
+      firstLogin: true,
+      hasSubmitted: false,
     }));
 
-    await User.insertMany(emailDocs, { ordered: false }); // skip duplicates
-    console.log("✅ Eligible emails seeded successfully");
+    await User.insertMany(seedData);
+
+    console.log("✅ Users seeded successfully");
     process.exit();
-  } catch (err) {
-    console.error("❌ Error seeding emails:", err.message);
+  } catch (error) {
+    console.error("❌ Error seeding users:", error);
     process.exit(1);
   }
 };
 
-seedEmails();
+seedUsers();
