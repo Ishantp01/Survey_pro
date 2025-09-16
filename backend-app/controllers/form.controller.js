@@ -8,13 +8,22 @@ import FormResponse from "../models/formResponse.model.js";
  */
 export const generateFormLink = async (req, res) => {
   try {
-    const linkId = crypto.randomBytes(16).toString("hex");
+    // 🔁 Reset all users
+    await User.updateMany({}, {
+      $set: {
+        password: null,
+        firstLogin: true,
+        formSubmitted: false
+      }
+    });
 
+    // 🔑 Generate new link
+    const linkId = crypto.randomBytes(16).toString("hex");
     const newLink = await FormLink.create({ linkId });
 
     res.status(201).json({
       success: true,
-      message: "Form link generated successfully",
+      message: "Form link generated successfully. All users have been reset.",
       link: `https://yourfrontend.com/form/${linkId}`,
       linkId: newLink.linkId
     });
