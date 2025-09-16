@@ -5,28 +5,35 @@ import User from "../models/user.js";
 export const submitTimeSlots = async (req, res) => {
   try {
     const { slots } = req.body;
-    const email = req.user?.email; // <- email from token middleware
+    const email = req.user?.email;
 
     if (!email) {
-      return res.status(401).json({ error: "Unauthorized: email not found in token" });
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
-    if (!slots || !slots.length) {
+    if (!slots || !Array.isArray(slots) || slots.length === 0) {
       return res.status(400).json({ error: "Slots are required" });
     }
 
-    // Save submission
-    const submission = new TimeSlotSubmission({ userEmail: email, slots });
+    // Save all slots in one submission
+    const submission = new TimeSlotSubmission({
+      userEmail: email,
+      slots
+    });
+
     await submission.save();
 
-    // Update user → mark as submitted
+    // Mark user as submitted
     await User.findOneAndUpdate(
       { email },
       { formSubmitted: true },
       { new: true }
     );
 
-    res.json({ message: "Time slots submitted successfully", submission });
+    res.json({
+      message: "All time slots submitted successfully",
+      submission
+    });
   } catch (error) {
     console.error("Error saving timeslot:", error);
     res.status(500).json({ error: "Failed to save time slots" });
