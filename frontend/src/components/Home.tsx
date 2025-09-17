@@ -228,16 +228,10 @@ export default function Home() {
   };
 
   const levelOptions = [
-    "E1",
-    "E2",
-    "E3",
-    "E4",
-    "E5",
-    "E6",
-    "E7",
-    "Ez",
+    "그룹장/섹션리더",
+    "실장 이상",
+    "본부/실/그룹 주무",
     "P1",
-    "P10",
     "P2",
     "P3",
     "P4",
@@ -246,13 +240,9 @@ export default function Home() {
     "P7",
     "P8",
     "P9",
+    "P10",
     "Pz",
-    "대리",
-    "부관리직",
-    "부총괄직",
-    "수석",
-    "주무",
-    "총괄직",
+    "현장전문직",
   ];
 
   const taskOptions1 = [
