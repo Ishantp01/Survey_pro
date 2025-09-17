@@ -29,7 +29,7 @@ export const generateFormLink = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Form link generated successfully. All users have been reset.",
-      link: `http://localhost:5173/form/${linkId}`,
+      link: `https://survey-pro-livid.vercel.app/form/${linkId}`,
       linkId: newLink.linkId,
     });
   } catch (error) {
@@ -60,7 +60,6 @@ export const getFormStructure = async (req, res) => {
         .json({ success: false, message: "Form already submitted" });
     }
 
-    // Send structure (or frontend can hardcode structure too)
     res.json({
       success: true,
       structure: {
@@ -74,8 +73,8 @@ export const getFormStructure = async (req, res) => {
 };
 
 /**
- * @desc Submit the form response
- * @route POST /api/form/:linkId/submit
+ * @desc
+ * @route
  */
 export const submitForm = async (req, res) => {
   try {
@@ -169,7 +168,6 @@ export const deleteResponse = async (req, res) => {
   }
 };
 
-
 // ✅ Test method - sends to a fixed list of emails
 export const sendFormInvites = async (req, res) => {
   try {
@@ -187,11 +185,12 @@ export const sendFormInvites = async (req, res) => {
       "janehwang@learning-crew.com",
       "jaeeun0211@learning-crew.com",
       "siddhantdubey867@gmail.com",
-      "sparshsahu8435@gmail.com"
+      "sparshsahu8435@gmail.com",
     ];
 
     // Static subject
-    const subject = "[회의·보고 문화 개선 프로젝트] 업무시간 활용 조사 참여 안내";
+    const subject =
+      "[회의·보고 문화 개선 프로젝트] 업무시간 활용 조사 참여 안내";
 
     // Email template
     const emailHtmlTemplate = (userEmail) => `
@@ -220,13 +219,14 @@ export const sendFormInvites = async (req, res) => {
       )
     );
 
-    res.json({ message: `Test emails sent to ${testEmails.length} recipients.` });
+    res.json({
+      message: `Test emails sent to ${testEmails.length} recipients.`,
+    });
   } catch (error) {
     console.error("Email sending error:", error);
     res.status(500).json({ error: "Failed to send test emails." });
   }
 };
-
 
 // export const sendFormInvites = async (req, res) => {
 //   try {

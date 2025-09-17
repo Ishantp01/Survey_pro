@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { BarChart3, Calendar, Filter, Download } from "lucide-react";
+import { format } from "date-fns";
+import { enIN } from "date-fns/locale";
 import Heading from "../components/Heading";
 import { apiFetch } from "../utils/api";
 import { Link } from "react-router-dom";
@@ -18,12 +20,75 @@ const workingDays = [
   "2025-10-02",
 ];
 
+const headOptions = [
+  "사장직속",
+  "경영기획본부",
+  "경영지원본부",
+  "철강본부",
+  "소재바이오본부",
+  "에너지사업본부",
+  "가스사업본부",
+];
+
+const options: { [key: string]: string[] } = {
+  사장직속: ["-"],
+  경영기획본부: [
+    "본부 직속",
+    "경영기획실",
+    "사업관리실",
+    "재무IR실",
+    "국제금융실",
+    "인사문화실",
+    "디지털혁신실",
+    "법무실",
+    "커뮤니케이션실",
+  ],
+  경영지원본부: [
+    "본부 직속",
+    "구매물류그룹(미얀마)",
+    "생산운영그룹(미얀마)",
+    "설비기술그룹(미얀마)",
+    "인사행정그룹(미얀마)",
+    "재무회계그룹(미얀마)",
+  ],
+  철강본부: [
+    "본부 직속",
+    "열연조강사업실",
+    "후판선재사업실",
+    "냉연사업실",
+    "스테인리스사업실",
+    "에너지인프라강재사업실",
+    "자동차소재사업실",
+    "모빌리티사업실",
+  ],
+  소재바이오본부: [
+    "본부 직속",
+    "원료소재사업실",
+    "식량사업개발실",
+    "식량사업실",
+    "산업소재사업실",
+  ],
+  에너지사업본부: [
+    "본부 직속",
+    "발전사업개발실",
+    "LNG사업실",
+    "터미널사업실",
+    "에너지기술지원실",
+    "에너지운영실",
+  ],
+  가스사업본부: ["본부 직속", "E&P사업실", "가스개발사업실", "가스전운영실"],
+};
+
 export default function Admin() {
   const [activeTab] = useState("surveyPeriod");
   const [dateRange, setDateRange] = useState("all");
   const [deptFilter, setDeptFilter] = useState("all");
+  const [divisionFilter, setDivisionFilter] = useState("all");
+  const [groupFilter, setGroupFilter] = useState("");
+  const [positionFilter, setPositionFilter] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
-  const [surveyData, setSurveyData] = useState([]);
+  const [surveyData, setSurveyData] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState({
     totalSubmissions: 0,
     avgTimeSpent: "0m 0s",
@@ -51,17 +116,23 @@ export default function Admin() {
     ];
     const csvContent = [
       headers.join(","),
-      ...filteredData.map((entry) =>
-        [
-          entry.date,
-          entry.timeInterval,
-          `"${entry.task1}"`,
-          `"${entry.task2}"`,
-          `"${entry.headquarters}"`,
-          `"${entry.division}"`,
-          `"${entry.group}"`,
-          `"${entry.position}"`,
-        ].join(",")
+      ...filteredData.flatMap((entry) =>
+        entry.slots.map((slot: any) =>
+          [
+            format(
+              utcToZonedTime(new Date(entry.date), "Asia/Kolkata"),
+              "yyyy-MM-dd",
+              { locale: enIN }
+            ),
+            slot.timeRange,
+            `"${slot.task1}"`,
+            `"${slot.task2}"`,
+            `"${entry.headquarters}"`,
+            `"${entry.division}"`,
+            `"${entry.group}"`,
+            `"${entry.position}"`,
+          ].join(",")
+        )
       ),
     ].join("\n");
 
@@ -71,7 +142,7 @@ export default function Admin() {
     link.setAttribute("href", url);
     link.setAttribute(
       "download",
-      `survey_data_${new Date().toISOString().split("T")[0]}.csv`
+      `survey_data_${format(new Date(), "yyyy-MM-dd")}.csv`
     );
     link.style.visibility = "hidden";
     document.body.appendChild(link);
@@ -82,39 +153,53 @@ export default function Admin() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setError(null);
         const response = await apiFetch("/api/survey-data", {
-          method: "POST",
+          method: "GET",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ dateRange, deptFilter }),
         });
         const result = await response.json();
-        setSurveyData(result.surveyEntries || []);
-        setStats({
-          totalSubmissions: result.totalSubmissions || 0,
-          avgTimeSpent: result.avgTimeSpent || "0m 0s",
-          completionRate: result.completionRate || "0%",
-          topDept: result.topDept || "N/A",
-        });
+        if (response.ok && result.success) {
+          setSurveyData(result.data || []);
+          setStats({
+            totalSubmissions: result.stats?.totalSubmissions || 0,
+            avgTimeSpent: result.stats?.avgTimeSpent || "0m 0s",
+            completionRate: result.stats?.completionRate || "0%",
+            topDept: result.stats?.topDept || "N/A",
+          });
+        } else {
+          setError(result.message || "Failed to fetch survey data");
+        }
       } catch (error) {
         console.error("Error fetching survey data:", error);
+        setError("Error fetching survey data");
       }
     };
     fetchData();
-  }, [dateRange, deptFilter]);
+  }, []);
 
   const filteredData = surveyData.filter((entry) => {
     const dateMatch = dateRange === "all" || entry.date === dateRange;
     const deptMatch = deptFilter === "all" || entry.headquarters === deptFilter;
-    return dateMatch && deptMatch;
+    const divisionMatch =
+      divisionFilter === "all" || entry.division === divisionFilter;
+    const groupMatch =
+      groupFilter === "" ||
+      entry.group.toLowerCase().includes(groupFilter.toLowerCase());
+    const positionMatch =
+      positionFilter === "all" || entry.position === positionFilter;
+    return (
+      dateMatch && deptMatch && divisionMatch && groupMatch && positionMatch
+    );
   });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-white px-4 py-10">
       <Heading />
       <div className="max-w-7xl mx-auto">
-        <Link to={"/generate-form-link"}>
+        <Link to="/generate-form-link">
           <button className="bg-green-600 p-2 font-bold text-lg rounded-xl px-3 mb-10 justify-end flex">
-            Generate form Link
+            Generate Form Link
           </button>
         </Link>
         <div className="mb-8 flex justify-between items-center">
@@ -132,6 +217,12 @@ export default function Admin() {
             데이터 내보내기
           </button>
         </div>
+
+        {error && (
+          <div className="bg-red-50 border-l-4 border-red-600 p-4 rounded-xl mb-6">
+            <p className="text-red-700">{error}</p>
+          </div>
+        )}
 
         <div className="bg-white shadow-xl rounded-xl p-6 mb-8 border border-gray-100">
           <div className="flex justify-between items-center mb-4">
@@ -175,7 +266,7 @@ export default function Admin() {
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white transition"
                 >
                   <option value="all">전체</option>
-                  {Object.keys(options).map((dept) => (
+                  {headOptions.map((dept) => (
                     <option key={dept} value={dept}>
                       {dept}
                     </option>
@@ -186,8 +277,12 @@ export default function Admin() {
                 <label className="block text-sm font-medium text-gray-800 mb-2">
                   실 필터
                 </label>
-                <select className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white transition">
-                  <option>전체</option>
+                <select
+                  value={divisionFilter}
+                  onChange={(e) => setDivisionFilter(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white transition"
+                >
+                  <option value="all">전체</option>
                   {deptFilter !== "all" &&
                     options[deptFilter].map((div) => (
                       <option key={div} value={div}>
@@ -202,6 +297,8 @@ export default function Admin() {
                 </label>
                 <input
                   type="text"
+                  value={groupFilter}
+                  onChange={(e) => setGroupFilter(e.target.value)}
                   placeholder="그룹 검색"
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white transition"
                 />
@@ -287,21 +384,32 @@ export default function Admin() {
               </thead>
               <tbody>
                 {filteredData.length > 0 ? (
-                  filteredData.map((entry, index) => (
-                    <tr
-                      key={index}
-                      className="border-b border-gray-200 hover:bg-gray-50"
-                    >
-                      <td className="px-6 py-4">{entry.date}</td>
-                      <td className="px-6 py-4">{entry.timeInterval}</td>
-                      <td className="px-6 py-4">{entry.task1}</td>
-                      <td className="px-6 py-4">{entry.task2}</td>
-                      <td className="px-6 py-4">{entry.headquarters}</td>
-                      <td className="px-6 py-4">{entry.division}</td>
-                      <td className="px-6 py-4">{entry.group}</td>
-                      <td className="px-6 py-4">{entry.position}</td>
-                    </tr>
-                  ))
+                  filteredData.flatMap((entry, index) =>
+                    entry.slots.map((slot: any, slotIndex: number) => (
+                      <tr
+                        key={`${index}-${slotIndex}`}
+                        className="border-b border-gray-200 hover:bg-gray-50"
+                      >
+                        <td className="px-6 py-4">
+                          {format(
+                            utcToZonedTime(
+                              new Date(entry.date),
+                              "Asia/Kolkata"
+                            ),
+                            "yyyy-MM-dd",
+                            { locale: enIN }
+                          )}
+                        </td>
+                        <td className="px-6 py-4">{slot.timeRange}</td>
+                        <td className="px-6 py-4">{slot.task1}</td>
+                        <td className="px-6 py-4">{slot.task2}</td>
+                        <td className="px-6 py-4">{entry.headquarters}</td>
+                        <td className="px-6 py-4">{entry.division}</td>
+                        <td className="px-6 py-4">{entry.group}</td>
+                        <td className="px-6 py-4">{entry.position}</td>
+                      </tr>
+                    ))
+                  )
                 ) : (
                   <tr>
                     <td
@@ -319,4 +427,7 @@ export default function Admin() {
       </div>
     </div>
   );
+}
+function utcToZonedTime(arg0: Date, arg1: string): string | number | Date {
+  throw new Error("Function not implemented.");
 }

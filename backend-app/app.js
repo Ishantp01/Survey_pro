@@ -17,7 +17,7 @@ app.use((req, res, next) => {
   const allowedOrigins = [
     "http://localhost:5173",
     "https://survey-pro-livid.vercel.app",
-    "http://localhost:3000", // Additional common dev port
+    "http://localhost:3000",
   ];
 
   const origin = req.headers.origin;

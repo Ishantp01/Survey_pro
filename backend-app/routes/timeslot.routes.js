@@ -3,15 +3,15 @@ import {
   submitTimeSlots,
   getAllTimeSlots,
   getMySubmission,
-  deleteTimeSlotSubmission
+  deleteTimeSlotSubmission,
 } from "../controllers/timeslotController.js";
 import { protect } from "../middlewares/AuthMiddleware.js";
 
 const router = express.Router();
 
-router.post("/submit",protect, submitTimeSlots);
+router.post("/submit", protect, submitTimeSlots);
 router.get("/me", protect, getMySubmission);
-router.get("/all", getAllTimeSlots); // Admin can protect this separately
+router.get("/all", getAllTimeSlots);
 router.delete("/:id", deleteTimeSlotSubmission);
 
 export default router;
