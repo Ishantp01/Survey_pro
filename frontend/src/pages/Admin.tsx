@@ -5,6 +5,7 @@ import Heading from "../components/Heading";
 import { apiFetch } from "../utils/api";
 import { Link } from "react-router-dom";
 import { enIN } from "date-fns/locale";
+import LogoutButton from "../components/LogoutButton";
 
 export default function Admin() {
   const [surveyData, setSurveyData] = useState<any[]>([]);
@@ -153,6 +154,9 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 to-white px-4 py-10">
+      <div className="w-full flex justify-end mb-4">
+        <LogoutButton />
+      </div>
       <Heading />
       <div className="max-w-7xl mx-auto">
         <Link to="/generate-form-link">

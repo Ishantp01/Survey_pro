@@ -4,6 +4,7 @@ import Heading from "./Heading";
 import { useLocation, useNavigate } from "react-router-dom";
 import { apiFetch } from "../utils/api";
 import { toast, ToastContainer } from "react-toastify";
+import LogoutButton from "./LogoutButton";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -419,6 +420,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-100 via-white to-sky-50 flex flex-col items-center px-6 py-12">
+      <div className="w-full flex justify-end mb-4">
+        <LogoutButton />
+      </div>
       <Heading />
       <div className="backdrop-blur-xl rounded-2xl p-12 max-w-4xl w-full">
         <h2 className="text-2xl font-semibold text-sky-700 mb-6">

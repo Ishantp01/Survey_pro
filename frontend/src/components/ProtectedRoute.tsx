@@ -11,14 +11,14 @@ const ProtectedRoute = ({
   children,
   requireAdmin = false,
 }: ProtectedRouteProps) => {
-  const { isAuthenticated, isAdminAuthenticated, isReady } = useAuth();
+  const { isAuthenticated, role, isReady } = useAuth();
 
   // Wait until auth state is ready
   if (!isReady) {
     return <div>Loading...</div>; // Or a loading spinner
   }
 
-  if (requireAdmin && !isAdminAuthenticated) {
+  if (requireAdmin && role !== "admin") {
     return <Navigate to="/adminlogin" replace />;
   }
 
