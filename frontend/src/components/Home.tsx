@@ -300,7 +300,7 @@ export default function Home() {
     }))
   );
   const [loading, setLoading] = useState(false);
-  const [linkId, setLinkId] = useState<string | null>(null);
+  const [_, setLinkId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
