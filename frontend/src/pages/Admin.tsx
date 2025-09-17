@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import Heading from "../components/Heading";
 import { apiFetch } from "../utils/api";
 import { Link } from "react-router-dom";
+import { enIN } from "date-fns/locale";
 
 const workingDays = [
   "2025-09-17",
@@ -165,24 +166,24 @@ export default function Admin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-white px-4 py-10">
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 to-white px-4 py-10">
       <Heading />
       <div className="max-w-7xl mx-auto">
         <Link to="/generate-form-link">
-          <button className="bg-green-600 p-2 font-bold text-lg rounded-xl px-3 mb-10 justify-end flex">
+          <button className="bg-sky-600 p-2 font-bold text-lg rounded-xl px-3 mb-10 justify-end flex">
             Generate Form Link
           </button>
         </Link>
         <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-extrabold text-green-700 mb-2">
+            <h1 className="text-3xl font-extrabold text-sky-700 mb-2">
               POSCO International 관리자 대시보드
             </h1>
             <p className="text-gray-600">수행 업무 조사 데이터 분석</p>
           </div>
           <button
             onClick={exportToCSV}
-            className="bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-lg hover:bg-green-800 transition"
+            className="bg-sky-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-lg hover:bg-sky-800 transition"
           >
             <Download className="w-4 h-4" />
             데이터 내보내기
@@ -201,9 +202,9 @@ export default function Admin() {
           <div className="bg-white shadow-xl rounded-xl p-6 border border-gray-100">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-medium text-gray-800">총 제출 수</h3>
-              <BarChart3 className="w-5 h-5 text-green-700" />
+              <BarChart3 className="w-5 h-5 text-sky-700" />
             </div>
-            <p className="text-3xl font-extrabold text-green-700">
+            <p className="text-3xl font-extrabold text-sky-700">
               {stats.totalSubmissions}
             </p>
           </div>
@@ -212,34 +213,32 @@ export default function Admin() {
               <h3 className="text-sm font-medium text-gray-800">
                 평균 소요 시간
               </h3>
-              <Calendar className="w-5 h-5 text-green-700" />
+              <Calendar className="w-5 h-5 text-sky-700" />
             </div>
-            <p className="text-3xl font-extrabold text-green-700">
+            <p className="text-3xl font-extrabold text-sky-700">
               {stats.avgTimeSpent}
             </p>
           </div>
           <div className="bg-white shadow-xl rounded-xl p-6 border border-gray-100">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-medium text-gray-800">완료율</h3>
-              <BarChart3 className="w-5 h-5 text-green-700" />
+              <BarChart3 className="w-5 h-5 text-sky-700" />
             </div>
-            <p className="text-3xl font-extrabold text-green-700">
+            <p className="text-3xl font-extrabold text-sky-700">
               {stats.completionRate}
             </p>
           </div>
         </div>
 
         <div className="bg-white shadow-xl rounded-xl p-6 mb-8 border border-gray-100">
-          <h3 className="text-lg font-semibold text-green-600 mb-4">
-            상위 본부
-          </h3>
-          <p className="text-2xl font-extrabold text-green-700">
+          <h3 className="text-lg font-semibold text-sky-600 mb-4">상위 본부</h3>
+          <p className="text-2xl font-extrabold text-sky-700">
             {stats.topDept}
           </p>
         </div>
 
         <div className="bg-white shadow-xl rounded-xl p-6 border border-gray-100">
-          <h3 className="text-lg font-semibold text-green-600 mb-4">
+          <h3 className="text-lg font-semibold text-sky-600 mb-4">
             제출 데이터
           </h3>
           <div className="overflow-x-auto">

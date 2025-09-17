@@ -341,11 +341,13 @@ export default function Home() {
     try {
       // Only include slots with both activities selected, and send only timeRange, activity1, activity2
       const slotsPayload = slots
-        .filter(slot => slot.activity1 && slot.activity2)
-        .map(slot => ({
+        .filter((slot) => slot.activity1 && slot.activity2)
+        .map((slot) => ({
           timeRange: slot.timeRange,
-          activity1: slot.activity1 === "기타" ? slot.customTask1 : slot.activity1,
-          activity2: slot.activity2 === "기타" ? slot.customTask2 : slot.activity2,
+          activity1:
+            slot.activity1 === "기타" ? slot.customTask1 : slot.activity1,
+          activity2:
+            slot.activity2 === "기타" ? slot.customTask2 : slot.activity2,
         }));
 
       if (slotsPayload.length === 0) {
@@ -387,13 +389,16 @@ export default function Home() {
       const timeslotData = await timeslotRes.json();
       const formData = await formRes.json();
 
-      if (timeslotRes.ok && timeslotData.success && formRes.ok && formData.success) {
+      if (
+        timeslotRes.ok &&
+        timeslotData.success &&
+        formRes.ok &&
+        formData.success
+      ) {
         alert("제출이 완료되었습니다!");
       } else {
         toast.error(
-          timeslotData.message ||
-          formData.message ||
-          "제출에 실패했습니다."
+          timeslotData.message || formData.message || "제출에 실패했습니다."
         );
       }
     } catch (err) {
@@ -405,10 +410,10 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-100 via-white to-green-50 flex flex-col items-center px-6 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-sky-100 via-white to-sky-50 flex flex-col items-center px-6 py-12">
       <Heading />
       <div className="backdrop-blur-xl rounded-2xl p-12 max-w-4xl w-full">
-        <h2 className="text-2xl font-semibold text-green-700 mb-6">
+        <h2 className="text-2xl font-semibold text-sky-700 mb-6">
           [조사 개요]
         </h2>
         <div className="text-gray-700 text-lg leading-relaxed space-y-3 mb-10">
@@ -445,7 +450,7 @@ export default function Home() {
         <form className="space-y-8" onSubmit={handleSubmit}>
           <div>
             <label className="block text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
-              <Building2 className="w-6 h-6 text-green-600" />
+              <Building2 className="w-6 h-6 text-sky-600" />
               1. 소속 본부 선택 *
             </label>
             <div className="relative w-full md:w-3/5">
@@ -456,7 +461,7 @@ export default function Home() {
                   setSelectedHead(newHead);
                   setSelectedDept(options[newHead][0]);
                 }}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-md pr-10 focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white shadow-sm transition appearance-none"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-md pr-10 focus:outline-none focus:ring-2 focus:ring-sky-600 bg-gray-50 hover:bg-white shadow-sm transition appearance-none"
               >
                 {headOptions.map((head) => (
                   <option key={head} value={head}>
@@ -470,14 +475,14 @@ export default function Home() {
 
           <div>
             <label className="block text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
-              <Users className="w-6 h-6 text-green-600" />
+              <Users className="w-6 h-6 text-sky-600" />
               2. 소속 실 선택 *
             </label>
             <div className="relative w-full md:w-3/5">
               <select
                 value={selectedDept}
                 onChange={(e) => setSelectedDept(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-md pr-10 focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white shadow-sm transition appearance-none"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-md pr-10 focus:outline-none focus:ring-2 focus:ring-sky-600 bg-gray-50 hover:bg-white shadow-sm transition appearance-none"
               >
                 {options[selectedHead].map((dept) => (
                   <option key={dept} value={dept}>
@@ -491,14 +496,14 @@ export default function Home() {
 
           <div>
             <label className="block text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
-              <Layers className="w-6 h-6 text-green-600" />
+              <Layers className="w-6 h-6 text-sky-600" />
               3. 소속 그룹 선택 *
             </label>
             <div className="relative w-full md:w-3/5">
               <select
                 value={selectedGroup}
                 onChange={(e) => setSelectedGroup(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-md pr-10 focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white shadow-sm transition appearance-none"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-md pr-10 focus:outline-none focus:ring-2 focus:ring-sky-600 bg-gray-50 hover:bg-white shadow-sm transition appearance-none"
               >
                 {(Array.isArray(groupOptions[selectedHead])
                   ? groupOptions[selectedHead]
@@ -515,14 +520,14 @@ export default function Home() {
 
           <div>
             <label className="block text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
-              <Award className="w-6 h-6 text-green-600" />
+              <Award className="w-6 h-6 text-sky-600" />
               4. 직급 선택(주무의 경우 주무 선택) *
             </label>
             <div className="relative w-full md:w-3/5">
               <select
                 value={selectedLevel}
                 onChange={(e) => setSelectedLevel(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-md pr-10 focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white shadow-sm transition appearance-none"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-md pr-10 focus:outline-none focus:ring-2 focus:ring-sky-600 bg-gray-50 hover:bg-white shadow-sm transition appearance-none"
               >
                 {levelOptions.map((level) => (
                   <option key={level} value={level}>
@@ -535,7 +540,7 @@ export default function Home() {
           </div>
 
           <div className="bg-white shadow-xl rounded-xl p-6 border border-gray-100 mb-8">
-            <h3 className="text-lg font-semibold text-green-600 mb-4">
+            <h3 className="text-lg font-semibold text-sky-600 mb-4">
               조사일 각 시간대별 수행한 업무의 종류를 선택해 주세요.
             </h3>
             <p className="text-gray-600 mb-4">
@@ -631,15 +636,15 @@ export default function Home() {
             <button
               type="submit"
               disabled={loading}
-              className="bg-gradient-to-r from-green-700 to-green-500 text-white font-semibold px-16 py-4 rounded-xl shadow-lg hover:shadow-xl transition transform hover:scale-[1.05] text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-gradient-to-r from-sky-700 to-sky-500 text-white font-semibold px-16 py-4 rounded-xl shadow-lg hover:shadow-xl transition transform hover:scale-[1.05] text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Submitting..." : "다음"}
             </button>
           </div>
         </form>
       </div>
-            {/* Toast Container */}
-            <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
+      {/* Toast Container */}
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
     </div>
   );
 }
