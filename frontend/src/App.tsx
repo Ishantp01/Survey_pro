@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -19,9 +18,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
-      
-
          <Route
           path="/generate-form-link"
           element={
@@ -34,7 +30,11 @@ function App() {
         {/* Form access route - public access via form link */}
         <Route
           path="/form/:linkId"
-          element={<Home />}
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
         />
 
         <Route path="/login" element={<Login />} />
