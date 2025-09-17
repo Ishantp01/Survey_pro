@@ -11,7 +11,7 @@ export const generateFormLink = async (req, res) => {
       {},
       {
         $set: {
-          password: "qwe12345", // must be >= 8 chars (default password)
+          password: null, // must be >= 8 chars (default password)
           firstLogin: true,
           formSubmitted: false,
         },
@@ -77,21 +77,20 @@ export const submitFormResponse = async (req, res) => {
 // Get all responses for a form
 export const getResponses = async (req, res) => {
   try {
-    const { formId } = req.params;
-    const { startDate, endDate } = req.query;
+    // Fetch all responses (latest first)
+    const responses = await FormResponse.find().sort({ submittedAt: -1 });
 
-    let filter = { formId };
-    if (startDate && endDate) {
-      filter.submittedAt = {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate),
-      };
-    }
-
-    const responses = await FormResponse.find(filter);
-    res.json({ success: true, responses });
+    return res.json({
+      success: true,
+      count: responses.length,
+      responses
+    });
   } catch (err) {
-    res.status(500).json({ success: false, message: "Error fetching responses", error: err.message });
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching responses",
+      error: err.message
+    });
   }
 };
 
