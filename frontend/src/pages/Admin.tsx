@@ -80,14 +80,14 @@ const options: { [key: string]: string[] } = {
 };
 
 export default function Admin() {
-  const [activeTab] = useState("surveyPeriod");
+  // const [activeTab] = useState("surveyPeriod");
   const [dateRange, setDateRange] = useState("all");
   const [deptFilter, setDeptFilter] = useState("all");
   const [divisionFilter, setDivisionFilter] = useState("all");
   const [groupFilter, setGroupFilter] = useState("");
-  const [positionFilter, setPositionFilter] = useState("all");
+  // const [positionFilter, setPositionFilter] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
-  const [surveyData, setSurveyData] = useState<any[]>([]);
+  // const [surveyData, setSurveyData] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState({
     totalSubmissions: 0,
@@ -428,6 +428,7 @@ export default function Admin() {
     </div>
   );
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function utcToZonedTime(arg0: Date, arg1: string): string | number | Date {
   throw new Error("Function not implemented.");
 }
