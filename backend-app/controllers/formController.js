@@ -40,6 +40,16 @@ export const generateFormLink = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
+
+export const getAllResponses = async (req, res) => {
+  try {
+    const responses = await FormResponse.find().sort({ submittedAt: -1 });
+    res.json({ success: true, responses });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 // Submit form response
 export const submitFormResponse = async (req, res) => {
   try {
