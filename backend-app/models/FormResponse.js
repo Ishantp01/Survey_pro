@@ -8,13 +8,17 @@ const timeSlotSchema = new mongoose.Schema({
 
 const formResponseSchema = new mongoose.Schema({
   formId: { type: mongoose.Schema.Types.ObjectId, ref: "Form", required: true },
-  email: { type: String, required: true }, // user email from token
+  email: { type: String, required: true },      // user email from token
   department: { type: String, required: true }, 
   team: { type: String, required: true },
   group: { type: String, required: true },
   position: { type: String, required: true },
-  timeSlots: [timeSlotSchema], // multiple slots per response
-  submittedAt: { type: Date, default: Date.now },
+  timeSlots: [timeSlotSchema],                  // multiple slots per response
+
+  // 🆕 Keep both server & client timestamps
+  submittedAt: { type: Date, default: Date.now }, 
+  clientDate: { type: String }, // "YYYY-MM-DD" from frontend
+  clientTime: { type: String }, // "HH:mm" from frontend
 });
 
 export default mongoose.model("FormResponse", formResponseSchema);
