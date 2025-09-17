@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 import "react-toastify/dist/ReactToastify.css";
 import { Link as LinkIcon, Send, Trash2, ClipboardList } from "lucide-react";
+import LogoutButton from "../components/LogoutButton";
 
 const GenerateForm: React.FC = () => {
   const { logout } = useAuth();
@@ -123,6 +124,9 @@ const GenerateForm: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-sky-50 to-sky-100 flex items-center justify-center p-4">
+      <div className="absolute top-6 right-8">
+        <LogoutButton />
+      </div>
       <div className="bg-white shadow-2xl rounded-3xl w-full max-w-2xl p-8">
         {/* Title */}
         <div className="flex items-center justify-center gap-2 mb-6">
