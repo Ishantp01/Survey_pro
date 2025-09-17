@@ -217,7 +217,7 @@ export default function Admin() {
                           className="border-b border-gray-200 hover:bg-gray-50"
                         >
                           <td className="px-6 py-4">
-                            {format(new Date(entry.submittedAt), "yyyy-MM-dd", {
+                            {format(new Date(entry.clientDate), "yyyy-MM-dd", {
                               locale: enIN,
                             })}
                           </td>
