@@ -71,6 +71,8 @@ const GenerateForm: React.FC = () => {
       setLoading(true);
       const res = await axios.post(
         "https://survey-pro-44pf.onrender.com/api/form/send-invites",
+                // "http://localhost:5000/api/form/send-invites",
+
         { formLink }
       );
       if (res.data.message) toast.success(res.data.message);
