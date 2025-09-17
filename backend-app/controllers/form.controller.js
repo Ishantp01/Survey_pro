@@ -29,8 +29,8 @@ export const generateFormLink = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Form link generated successfully. All users have been reset.",
-      // link: `https://survey-pro-livid.vercel.app/form/${linkId}`,
-      link: `http://localhost:5173/form/${linkId}`,
+      link: `https://survey-pro-livid.vercel.app/form/${linkId}`,
+      // link: `http://localhost:5173/form/${linkId}`,
       linkId: newLink.linkId,
     });
   } catch (error) {

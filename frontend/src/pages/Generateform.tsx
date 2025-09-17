@@ -30,7 +30,7 @@ const GenerateForm: React.FC = () => {
     try {
       setLoading(true);
       const res = await axios.post(
-        "http://localhost:5000/api/form/generate",
+        "https://survey-pro-44pf.onrender.com/api/form/generate",
         {}
       );
       if (res.data.success) {
