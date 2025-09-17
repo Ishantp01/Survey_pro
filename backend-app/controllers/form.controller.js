@@ -60,7 +60,6 @@ export const getFormStructure = async (req, res) => {
         .json({ success: false, message: "Form already submitted" });
     }
 
-    // Send structure (or frontend can hardcode structure too)
     res.json({
       success: true,
       structure: {
@@ -74,8 +73,8 @@ export const getFormStructure = async (req, res) => {
 };
 
 /**
- * @desc Submit the form response
- * @route POST /api/form/:linkId/submit
+ * @desc
+ * @route
  */
 export const submitForm = async (req, res) => {
   try {
