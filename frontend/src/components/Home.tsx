@@ -336,55 +336,69 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    let currentLinkId = linkId;
-    if (!currentLinkId) {
-      const storedFormLink = localStorage.getItem("formLink");
-      if (storedFormLink) {
-        currentLinkId = storedFormLink.split("/").pop() || "";
-      }
-    }
-
-    if (!currentLinkId) {
-
-      toast.error("Form link not ready yet. Please generate a form link first.");
-      return;
-    }
-
     setLoading(true);
+
     try {
-      const rawData = {
+      // Only include slots with both activities selected, and send only timeRange, activity1, activity2
+      const slotsPayload = slots
+        .filter(slot => slot.activity1 && slot.activity2)
+        .map(slot => ({
+          timeRange: slot.timeRange,
+          activity1: slot.activity1 === "기타" ? slot.customTask1 : slot.activity1,
+          activity2: slot.activity2 === "기타" ? slot.customTask2 : slot.activity2,
+        }));
+
+      if (slotsPayload.length === 0) {
+        setError("최소 1개 이상의 시간대에 대해 업무를 선택해 주세요.");
+        setLoading(false);
+        return;
+      }
+
+      // Prepare form payload
+      const formPayload = {
         headquarters: selectedHead,
         division: selectedDept,
         group: selectedGroup,
         position: selectedLevel,
-        date: new Date().toISOString().split("T")[0], // Use current date
-        slots: slots.map((slot) => ({
-          timeRange: slot.timeRange,
-          task1: slot.activity1 === "기타" ? slot.customTask1 : slot.activity1,
-          task2: slot.activity2 === "기타" ? slot.customTask2 : slot.activity2,
-        })),
       };
 
-      const res = await apiFetch(`/api/form/${currentLinkId}/submit`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(rawData),
-      });
+      const token = localStorage.getItem("token");
 
-      const data = await res.json();
+      // Hit both APIs in parallel
+      const [timeslotRes, formRes] = await Promise.all([
+        apiFetch("/api/timeslot/submit", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ slots: slotsPayload }),
+        }),
+        apiFetch(`/api/form/${linkId}/submit`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify(formPayload),
+        }),
+      ]);
 
-      if (res.ok && data.success) {
-        alert(data.message || "Form submitted successfully!");
+      const timeslotData = await timeslotRes.json();
+      const formData = await formRes.json();
+
+      if (timeslotRes.ok && timeslotData.success && formRes.ok && formData.success) {
+        alert("제출이 완료되었습니다!");
       } else {
-        toast.error(data.message || "Form submission failed.");
+        toast.error(
+          timeslotData.message ||
+          formData.message ||
+          "제출에 실패했습니다."
+        );
       }
     } catch (err) {
       console.error(err);
-      toast.error("Something went wrong while submitting the form.");
-
+      toast.error("제출 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
