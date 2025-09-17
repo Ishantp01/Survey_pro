@@ -40,7 +40,7 @@ const AdminLogin = () => {
           onChange={(e) =>
             setCredentials({ ...credentials, username: e.target.value })
           }
-          className="w-full mb-4 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400"
+          className="w-full mb-4 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-400"
         />
 
         <input
@@ -50,7 +50,7 @@ const AdminLogin = () => {
           onChange={(e) =>
             setCredentials({ ...credentials, password: e.target.value })
           }
-          className="w-full mb-6 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400"
+          className="w-full mb-6 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-400"
         />
 
         <button
