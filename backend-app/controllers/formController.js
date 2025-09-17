@@ -2,6 +2,7 @@ import Form from "../models/Form.js";
 import FormResponse from "../models/FormResponse.js";
 import crypto from "crypto";
 import userModel from "../models/user.model.js";
+import { sendEmail } from "../utils/email.util.js";
 
 // Generate new form link and reset users
 export const generateFormLink = async (req, res) => {
