@@ -280,6 +280,7 @@ export default function Home() {
         )[0]?.[0]) || "-"
   );
   const [selectedLevel, setSelectedLevel] = useState(levelOptions[0]);
+  const [clientDate, setClientDate] = useState("");
   const [slots, setSlots] = useState(
     timeIntervals.map((timeRange) => ({
       timeRange,
@@ -366,8 +367,8 @@ export default function Home() {
         return;
       }
 
-      // Automatically set clientDate and clientTime to current date and time if not provided
-      const currentDate = new Date().toISOString().split("T")[0];
+      // Automatically set clientDate if not provided, and clientTime to current time
+      const currentDate = clientDate || new Date().toISOString().split("T")[0];
       const currentTime = new Date().toTimeString().split(" ")[0].slice(0, 5);
 
       // Prepare form payload
@@ -538,6 +539,21 @@ export default function Home() {
                 ))}
               </select>
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
+              <Award className="w-6 h-6 text-sky-600" />
+              5. Date
+            </label>
+            <div className="relative w-full md:w-3/5">
+              <input
+                type="date"
+                value={clientDate}
+                onChange={(e) => setClientDate(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-md pr-10 focus:outline-none focus:ring-2 focus:ring-sky-600 bg-gray-50 hover:bg-white shadow-sm transition"
+              />
             </div>
           </div>
 
