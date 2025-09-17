@@ -382,7 +382,7 @@ export default function Home() {
         timeSlots: slotsPayload,
       };
 
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("user_token");
 
       // Single API call
       const response = await apiFetch(`/api/form/submit`, {
