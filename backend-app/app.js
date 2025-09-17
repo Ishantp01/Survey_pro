@@ -14,8 +14,17 @@ app.use(express.json());
 app.use(helmet());
 
 app.use((req, res, next) => {
-  const origin = "https://survey-pro-livid.vercel.app";
-  res.header("Access-Control-Allow-Origin", origin === "*" ? "*" : origin);
+  const allowedOrigins = [
+    "http://localhost:5173",
+    "https://survey-pro-livid.vercel.app",
+    "http://localhost:3000", // Additional common dev port
+  ];
+
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+
   res.header("Vary", "Origin");
   res.header(
     "Access-Control-Allow-Methods",

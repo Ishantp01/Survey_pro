@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { Building2, Users, Layers, ChevronDown, Award } from "lucide-react";
+import {
+  Building2,
+  Users,
+  Layers,
+  ChevronDown,
+  Award,
+  Calendar,
+} from "lucide-react";
 import Heading from "./Heading";
 import { useLocation, useNavigate } from "react-router-dom";
 import { apiFetch } from "../utils/api";
@@ -8,7 +15,6 @@ export default function Home() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Headquarters and options
   const headOptions = [
     "사장직속",
     "경영기획본부",
@@ -17,7 +23,7 @@ export default function Home() {
     "에너지사업본부",
     "가스사업본부",
   ];
-  const options: Record<string, string[]> = {
+  const options = {
     사장직속: ["-"],
     경영기획본부: [
       "본부 직속",
@@ -66,32 +72,76 @@ export default function Home() {
     "일반(P5~P6)",
   ];
 
-  // Form state
+  const taskOptions1 = [
+    "영업/직무 관련 업무수행",
+    "업무 관련 커뮤니케이션(메일, 메신저, 전화 등)",
+    "회의·보고 자료 작성",
+    "회의·보고 참석",
+    "재무/정산/결산 업무",
+    "교육 참여",
+    "기타",
+  ];
+  const taskOptions2 = ["업무 1만 수행", ...taskOptions1];
+
+  const timeIntervals = [];
+  for (let hour = 7; hour < 22; hour++) {
+    timeIntervals.push(
+      `${hour.toString().padStart(2, "0")}:00-${hour
+        .toString()
+        .padStart(2, "0")}:30`
+    );
+    timeIntervals.push(
+      `${hour.toString().padStart(2, "0")}:30-${(hour + 1)
+        .toString()
+        .padStart(2, "0")}:00`
+    );
+  }
+
+  const workingDays = [
+    "2025-09-18",
+    "2025-09-19",
+    "2025-09-22",
+    "2025-09-23",
+    "2025-09-24",
+    "2025-09-25",
+    "2025-09-26",
+    "2025-09-29",
+    "2025-09-30",
+    "2025-10-01",
+    "2025-10-02",
+  ];
+
   const [selectedHead, setSelectedHead] = useState(headOptions[0]);
   const [selectedDept, setSelectedDept] = useState(options[headOptions[0]][0]);
   const [groupName, setGroupName] = useState("");
   const [selectedLevel, setSelectedLevel] = useState(levelOptions[0]);
+  const [selectedDate, setSelectedDate] = useState(workingDays[0]); // Default to first working day
+  const [slots, setSlots] = useState(
+    timeIntervals.map((timeRange) => ({
+      timeRange,
+      activity1: "",
+      activity2: "",
+      customTask1: "",
+      customTask2: "",
+    }))
+  );
   const [loading, setLoading] = useState(false);
-  const [linkId, setLinkId] = useState<string | null>(null);
+  const [linkId, setLinkId] = useState(null);
 
-  // 🔹 Get linkId from URL or localStorage (formLink)
   useEffect(() => {
-    const urlParts = location.pathname.split("/"); // e.g. /form/<linkId>
+    const urlParts = location.pathname.split("/");
     const urlLinkId = urlParts[2] || null;
-    const storedFormLink = localStorage.getItem("formLink"); // Get full formLink from localStorage
+    const storedFormLink = localStorage.getItem("formLink");
     const storedLinkId = localStorage.getItem("linkId");
 
     if (urlLinkId) {
-      // User accessed directly via /form/<linkId> URL
       setLinkId(urlLinkId);
-      localStorage.setItem("linkId", urlLinkId); // persist for reloads
+      localStorage.setItem("linkId", urlLinkId);
     } else if (storedFormLink) {
-      // Extract linkId from full formLink URL (e.g. "http://localhost:5000/form/abc123")
       const extractedLinkId = storedFormLink.split("/").pop() || "";
       if (extractedLinkId) {
         setLinkId(extractedLinkId);
-        localStorage.setItem("linkId", extractedLinkId); // persist for future use
-        // Navigate to the proper URL if we're not already there
+        localStorage.setItem("linkId", extractedLinkId);
         if (!urlLinkId && location.pathname === "/") {
           navigate(`/form/${extractedLinkId}`, { replace: true });
         }
@@ -103,19 +153,23 @@ export default function Home() {
       }
     } else if (storedLinkId) {
       setLinkId(storedLinkId);
-      // Navigate to the proper URL if we're not already there
       if (!urlLinkId && location.pathname === "/") {
         navigate(`/form/${storedLinkId}`, { replace: true });
       }
     }
-    // Removed the else clause to prevent showing alert on page load
   }, [location.pathname, navigate]);
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
+  const updateSlot = (idx, field, value) => {
+    setSlots((prev) => {
+      const next = [...prev];
+      next[idx] = { ...next[idx], [field]: value };
+      return next;
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Get linkId from state or try to extract from localStorage formLink
     let currentLinkId = linkId;
     if (!currentLinkId) {
       const storedFormLink = localStorage.getItem("formLink");
@@ -136,6 +190,12 @@ export default function Home() {
         division: selectedDept,
         group: groupName,
         position: selectedLevel,
+        date: selectedDate,
+        slots: slots.map((slot) => ({
+          timeRange: slot.timeRange,
+          task1: slot.activity1 === "기타" ? slot.customTask1 : slot.activity1,
+          task2: slot.activity2 === "기타" ? slot.customTask2 : slot.activity2,
+        })),
       };
 
       const res = await apiFetch(`/api/form/${currentLinkId}/submit`, {
@@ -150,8 +210,6 @@ export default function Home() {
 
       if (res.ok && data.success) {
         alert(data.message);
-        // Optionally redirect to a "Thank you" page or open confirmation
-        // window.open(`/form/${currentLinkId}/submitted`, "_blank");
       } else {
         alert(data.message || "Form submission failed.");
       }
@@ -182,7 +240,7 @@ export default function Home() {
               조사 기간: 2025년 9월 18일(목) ~ 10월 2일(목), 총 2주(10영업일)
             </li>
             <li>
-              매일 퇴근 전까지 시간대별로 구분해 제시된 항목에서 선택하시면
+              매일 퇴근 전까지 시간대별로 업무 유형을 제시된 항목에서 선택하시면
               됩니다.
             </li>
             <li>
@@ -190,13 +248,13 @@ export default function Home() {
             </li>
             <li>
               여러분의 응답은 불필요한 업무를 줄이고, 회의·보고 문화를 개선하는
-              근거가 됩니다.
+              중요한 근거가 됩니다.
             </li>
+            <li>빠짐없이 참여해 주시면 감사하겠습니다.</li>
           </ul>
         </div>
 
         <form className="space-y-8" onSubmit={handleSubmit}>
-          {/* Headquarters */}
           <div>
             <label className="block text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
               <Building2 className="w-6 h-6 text-green-600" />
@@ -222,7 +280,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Department */}
           <div>
             <label className="block text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
               <Users className="w-6 h-6 text-green-600" />
@@ -244,7 +301,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Group */}
           <div>
             <label className="block text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
               <Layers className="w-6 h-6 text-green-600" />
@@ -259,7 +315,6 @@ export default function Home() {
             />
           </div>
 
-          {/* Position */}
           <div>
             <label className="block text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
               <Award className="w-6 h-6 text-green-600" />
@@ -278,6 +333,120 @@ export default function Home() {
                 ))}
               </select>
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
+              {/* <Calendar className="w-6 h-6 text-green-600" /> */}
+              5. 조사일 선택 *
+            </label>
+            <div className="relative w-full md:w-3/5">
+              <select
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-md pr-10 focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white shadow-sm transition appearance-none"
+              >
+                {workingDays.map((day) => (
+                  <option key={day} value={day}>
+                    {day}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
+            </div>
+          </div>
+
+          <div className="bg-white shadow-xl rounded-xl p-6 border border-gray-100 mb-8">
+            <h3 className="text-lg font-semibold text-green-600 mb-4">
+              조사일 각 시간대별 수행한 업무의 종류를 선택해 주세요.
+            </h3>
+            <p className="text-gray-600 mb-4">
+              - 2개 이상의 업무를 동시 수행한 경우 비중이 높은 업무 2개를 각각
+              선택합니다.
+              <br />- 수행 업무가 미입력된 시간대는 정규 업무 시간이 아닌 것으로
+              집계됩니다.
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left text-gray-700">
+                <thead className="text-xs text-gray-800 uppercase bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3">
+                      시간
+                    </th>
+                    <th scope="col" className="px-6 py-3">
+                      업무 1의 옵션
+                    </th>
+                    <th scope="col" className="px-6 py-3">
+                      업무 2의 옵션
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {slots.map((slot, idx) => (
+                    <tr
+                      key={slot.timeRange}
+                      className="border-b border-gray-200 hover:bg-gray-50"
+                    >
+                      <td className="px-6 py-4">{slot.timeRange}</td>
+                      <td className="px-6 py-4">
+                        <select
+                          value={slot.activity1}
+                          onChange={(e) =>
+                            updateSlot(idx, "activity1", e.target.value)
+                          }
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                        >
+                          <option value="">선택</option>
+                          {taskOptions1.map((option) => (
+                            <option key={option} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
+                        {slot.activity1 === "기타" && (
+                          <input
+                            type="text"
+                            value={slot.customTask1}
+                            onChange={(e) =>
+                              updateSlot(idx, "customTask1", e.target.value)
+                            }
+                            placeholder="기타 업무 입력"
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mt-2"
+                          />
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <select
+                          value={slot.activity2}
+                          onChange={(e) =>
+                            updateSlot(idx, "activity2", e.target.value)
+                          }
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                        >
+                          <option value="">선택</option>
+                          {taskOptions2.map((option) => (
+                            <option key={option} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
+                        {slot.activity2 === "기타" && (
+                          <input
+                            type="text"
+                            value={slot.customTask2}
+                            onChange={(e) =>
+                              updateSlot(idx, "customTask2", e.target.value)
+                            }
+                            placeholder="기타 업무 입력"
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mt-2"
+                          />
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
 
