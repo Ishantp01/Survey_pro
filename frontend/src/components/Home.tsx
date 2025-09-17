@@ -20,28 +20,23 @@ export default function Home() {
   ];
 
   const options: { [key: string]: string[] } = {
-    사장직속: ["-"],
+    사장직속: ["DX추진반(실)", "정도경영실"],
     경영기획본부: [
-      "본부 직속",
+      "경영기획본부 직속",
       "경영기획실",
-      "사업관리실",
-      "재무IR실",
       "국제금융실",
+      "재무IR실",
+      "사업관리실",
+    ],
+    경영지원본부: [
+      "경영지원본부 직속",
       "인사문화실",
       "디지털혁신실",
       "법무실",
       "커뮤니케이션실",
     ],
-    경영지원본부: [
-      "본부 직속",
-      "구매물류그룹(미얀마)",
-      "생산운영그룹(미얀마)",
-      "설비기술그룹(미얀마)",
-      "인사행정그룹(미얀마)",
-      "재무회계그룹(미얀마)",
-    ],
     철강본부: [
-      "본부 직속",
+      "철강본부 직속",
       "열연조강사업실",
       "후판선재사업실",
       "냉연사업실",
@@ -51,35 +46,51 @@ export default function Home() {
       "모빌리티사업실",
     ],
     소재바이오본부: [
-      "본부 직속",
-      "원료소재사업실",
-      "식량사업개발실",
-      "식량사업실",
+      "소재바이오본부 직속",
       "산업소재사업실",
+      "식량사업실",
+      "식량사업개발실",
+      "원료소재사업실",
     ],
     에너지사업본부: [
-      "본부 직속",
-      "발전사업개발실",
+      "에너지사업본부 직속",
       "LNG사업실",
+      "발전사업개발실",
       "터미널사업실",
       "에너지기술지원실",
       "에너지운영실",
     ],
-    가스사업본부: ["본부 직속", "E&P사업실", "가스개발사업실", "가스전운영실"],
+    가스사업본부: [
+      "가스사업본부 직속",
+      "E&P사업실",
+      "가스개발사업실",
+      "가스전운영실",
+    ],
   };
 
   const groupOptions: {
     [key: string]: string[] | { [key: string]: string[] };
   } = {
-    사장직속: ["-", "윤리경영사무국", "정도경영1그룹", "정도경영2그룹"],
+    사장직속: {
+      "DX추진반(실)": ["DX추진반", "DX추진반장"],
+      정도경영실: ["윤리경영사무국", "정도경영1그룹", "정도경영2그룹"],
+    },
     경영기획본부: {
-      "본부 직속": [
+      "경영기획본부 직속": [],
+      경영기획실: [
         "경영전략그룹",
         "재무기획그룹",
         "지속가능경영그룹",
         "투자심사그룹",
       ],
-      경영기획실: ["ERM그룹", "무역금융그룹", "자금그룹"],
+      국제금융실: ["ERM그룹", "무역금융그룹", "자금그룹"],
+      재무IR실: [
+        "IR그룹",
+        "관리회계그룹",
+        "내부회계섹션",
+        "세무그룹",
+        "재무회계그룹",
+      ],
       사업관리실: [
         "구조조정TF",
         "법인지사관리그룹",
@@ -88,14 +99,9 @@ export default function Home() {
         "투자관리1그룹",
         "투자관리2그룹",
       ],
-      재무IR실: [
-        "IR그룹",
-        "관리회계그룹",
-        "내부회계섹션",
-        "세무그룹",
-        "재무회계그룹",
-      ],
-      국제금융실: [],
+    },
+    경영지원본부: {
+      "경영지원본부 직속": [],
       인사문화실: [
         "HR그룹",
         "노무후생그룹",
@@ -103,26 +109,18 @@ export default function Home() {
         "행정지원그룹",
       ],
       디지털혁신실: ["IT기획그룹", "IT혁신그룹", "정보보호그룹"],
-      법무실: ["법무1그룹", "법무2그룹", "안전보건그룹"],
+      법무실: ["법무1그룹", "법무2그룹"],
+      안전보건그룹: ["안전보건그룹"],
+
       커뮤니케이션실: [
         "대외협력그룹",
         "사회공헌그룹",
         "여자탁구단",
         "홍보그룹",
-        "DX추진반",
-        "DX추진반장",
       ],
     },
-    경영지원본부: {
-      "본부 직속": [],
-      "구매물류그룹(미얀마)": [],
-      "생산운영그룹(미얀마)": [],
-      "설비기술그룹(미얀마)": [],
-      "인사행정그룹(미얀마)": [],
-      "재무회계그룹(미얀마)": [],
-    },
     철강본부: {
-      "본부 직속": [],
+      "철강본부 직속": [],
       열연조강사업실: [
         "열연내수그룹",
         "열연수출1그룹",
@@ -148,36 +146,33 @@ export default function Home() {
         "태양광강재그룹",
         "풍력강재그룹",
       ],
-      자동차소재사업실: [
+      자동차소재사업실: ["동서남아그룹", "미구주그룹", "일본그룹", "중국그룹"],
+      전사CRM구축FT: ["전사 CRM 구축 TF"],
+      철강사업운영그룹: [
+        "철강영업지원1섹션",
+        "철강영업지원2섹션",
+        "철강영업지원3섹션",
+        "철강영업지원4섹션",
+      ],
+      모빌리티사업실: [
         "E파워트레인부품그룹",
         "모터코아판매그룹",
         "인프라부품그룹",
         "전기강판판매그룹",
       ],
-      모빌리티사업실: [
-        "동서남아그룹",
-        "미구주그룹",
-        "일본그룹",
-        "중국그룹",
-        "전사 CRM 구축 TF",
-        "철강영업지원1섹션",
-        "철강영업지원2섹션",
-        "철강영업지원3섹션",
-        "철강영업지원4섹션",
-        "철강사업운영그룹",
-      ],
     },
     소재바이오본부: {
-      "본부 직속": ["소재바이오사업운영섹션", "공공프로젝트그룹"],
-      원료소재사업실: [
+      "소재바이오본부 직속": ["소재바이오사업운영섹션"],
+      공공프로젝트그룹: ["공공프로젝트그룹"],
+      산업소재사업실: [
         "기초소재그룹",
         "바이오&케미컬그룹",
         "바이오사업개발그룹",
         "소재바이오영업지원섹션",
       ],
-      식량사업개발실: ["면방사업TF", "식량투자기획그룹", "유지사업개발그룹"],
       식량사업실: ["곡물1그룹", "곡물2그룹", "곡물3그룹", "식물유지그룹"],
-      산업소재사업실: [
+      식량사업개발실: ["면방사업TF", "식량투자기획그룹", "유지사업개발그룹"],
+      원료소재사업실: [
         "이차전지광물그룹",
         "이차전지소재그룹",
         "철강원료1그룹",
@@ -187,9 +182,9 @@ export default function Home() {
       ],
     },
     에너지사업본부: {
-      "본부 직속": ["3~4호기 신예화추진반"],
-      발전사업개발실: [],
+      "에너지사업본부 직속": [],
       LNG사업실: ["LNG조달그룹", "LNG트레이딩그룹", "선박연료사업그룹"],
+      발전사업개발실: ["3~4호기 신예화추진반"],
       터미널사업실: ["터미널건설추진반"],
       에너지기술지원실: ["기술지원그룹", "에너지행정지원그룹", "혁신섹션"],
       에너지운영실: [
@@ -198,16 +193,36 @@ export default function Home() {
         "발전운영그룹",
         "발전정비그룹",
         "터미널운영그룹",
-        "에너지정책그룹",
-        "저탄소에너지사업그룹",
-        "전력거래그룹",
       ],
+      에너지정책그룹: ["에너지정책그룹"],
+      저탄소에너지사업그룹: ["저탄소에너지사업그룹"],
+      전력거래그룹: ["전력거래그룹"],
     },
     가스사업본부: {
-      "본부 직속": [],
-      "E&P사업실": ["시추생산그룹", "저류평가섹션"],
-      가스개발사업실: [],
-      가스전운영실: [],
+      "가스사업본부 직속": ["가스사업운영섹션"],
+      "E&P사업실": [
+        "E&P사업개발그룹",
+        "Senex운영그룹",
+        "북미사업추진반",
+        "사업운영그룹",
+        "해외탐사그룹",
+      ],
+      가스개발사업실: [
+        "CCS사업화추진반",
+        "CCS사업화추진반(미국파견)",
+        "CCS사업화추진반(인니파견)",
+        "가스생산설비그룹",
+        "개발엔지니어링그룹",
+        "시추생산그룹",
+        "저류평가섹션",
+      ],
+      가스전운영실: [
+        "구매물류그룹(미얀마)",
+        "생산운영그룹(미얀마)",
+        "설비기술그룹(미얀마)",
+        "인사행정그룹(미얀마)",
+        "재무회계그룹(미얀마)",
+      ],
     },
   };
 
@@ -246,7 +261,7 @@ export default function Home() {
     "회의·보고 참석",
     "재무/정산/결산 업무",
     "교육 참여",
-    "기타",
+    "기타 [주관식 기입 가능]",
   ];
   const taskOptions2 = ["업무 1만 수행", ...taskOptions1];
 
@@ -344,10 +359,14 @@ export default function Home() {
         .filter((slot) => slot.activity1 && slot.activity2)
         .map((slot) => ({
           timeRange: slot.timeRange,
-          activity1:
-            slot.activity1 === "기타" ? slot.customTask1 : slot.activity1,
-          activity2:
-            slot.activity2 === "기타" ? slot.customTask2 : slot.activity2,
+          task1:
+            slot.activity1 === "기타 [주관식 기입 가능]"
+              ? slot.customTask1
+              : slot.activity1,
+          task2:
+            slot.activity2 === "기타 [주관식 기입 가능]"
+              ? slot.customTask2
+              : slot.activity2,
         }));
 
       if (slotsPayload.length === 0) {
@@ -356,50 +375,39 @@ export default function Home() {
         return;
       }
 
+      // Automatically set clientDate and clientTime to current date and time if not provided
+      const currentDate = new Date().toISOString().split("T")[0];
+      const currentTime = new Date().toTimeString().split(" ")[0].slice(0, 5);
+
       // Prepare form payload
       const formPayload = {
-        headquarters: selectedHead,
-        division: selectedDept,
+        department: selectedHead,
+        team: selectedDept,
         group: selectedGroup,
         position: selectedLevel,
+        clientDate: currentDate,
+        clientTime: currentTime,
+        timeSlots: slotsPayload,
       };
 
       const token = localStorage.getItem("token");
 
-      // Hit both APIs in parallel
-      const [timeslotRes, formRes] = await Promise.all([
-        apiFetch("/api/timeslot/submit", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({ slots: slotsPayload }),
-        }),
-        apiFetch(`/api/form/${linkId}/submit`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify(formPayload),
-        }),
-      ]);
+      // Single API call
+      const response = await apiFetch(`/api/form/submit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(formPayload),
+      });
 
-      const timeslotData = await timeslotRes.json();
-      const formData = await formRes.json();
+      const data = await response.json();
 
-      if (
-        timeslotRes.ok &&
-        timeslotData.success &&
-        formRes.ok &&
-        formData.success
-      ) {
+      if (response.ok && data.success) {
         alert("제출이 완료되었습니다!");
       } else {
-        toast.error(
-          timeslotData.message || formData.message || "제출에 실패했습니다."
-        );
+        toast.error(data.message || "제출에 실패했습니다.");
       }
     } catch (err) {
       console.error(err);
@@ -497,7 +505,7 @@ export default function Home() {
           <div>
             <label className="block text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
               <Layers className="w-6 h-6 text-sky-600" />
-              3. 소속 그룹 선택 *
+              3. 소속 그룹(부서) 선택
             </label>
             <div className="relative w-full md:w-3/5">
               <select
@@ -521,7 +529,7 @@ export default function Home() {
           <div>
             <label className="block text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
               <Award className="w-6 h-6 text-sky-600" />
-              4. 직급 선택(주무의 경우 주무 선택) *
+              4.직급 선택(주무의 경우 주무 선택)
             </label>
             <div className="relative w-full md:w-3/5">
               <select
@@ -586,7 +594,7 @@ export default function Home() {
                             </option>
                           ))}
                         </select>
-                        {slot.activity1 === "기타" && (
+                        {slot.activity1 === "기타 [주관식 기입 가능]" && (
                           <input
                             type="text"
                             value={slot.customTask1}
@@ -613,7 +621,7 @@ export default function Home() {
                             </option>
                           ))}
                         </select>
-                        {slot.activity2 === "기타" && (
+                        {slot.activity2 === "기타 [주관식 기입 가능]" && (
                           <input
                             type="text"
                             value={slot.customTask2}
