@@ -19,6 +19,14 @@ export default function Admin() {
   });
   const [selectedDate, setSelectedDate] = useState<string>("");
 
+  // --- Safe date formatter ---
+  const safeFormatDate = (dateValue: any) => {
+    if (!dateValue) return "N/A";
+    const d = new Date(dateValue);
+    if (isNaN(d.getTime())) return "N/A";
+    return format(d, "yyyy-MM-dd", { locale: enIN });
+  };
+
   // --- Fetch Data ---
   const fetchData = async (date?: string) => {
     setLoading(true);
@@ -100,7 +108,7 @@ export default function Admin() {
       ...surveyData.flatMap((entry) =>
         (entry.timeSlots || []).map((slot: any) =>
           [
-            format(new Date(entry.clientDate), "yyyy-MM-dd", { locale: enIN }),
+            safeFormatDate(entry.clientDate),
             slot.timeRange || "N/A",
             `"${slot.task1 || "N/A"}"`,
             `"${slot.task2 || "N/A"}"`,
@@ -118,7 +126,7 @@ export default function Admin() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `survey_data_${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.download = `survey_data_${safeFormatDate(new Date())}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -217,9 +225,7 @@ export default function Admin() {
                           className="border-b border-gray-200 hover:bg-gray-50"
                         >
                           <td className="px-6 py-4">
-                            {format(new Date(entry.clientDate), "yyyy-MM-dd", {
-                              locale: enIN,
-                            })}
+                            {safeFormatDate(entry.clientDate)}
                           </td>
                           <td className="px-6 py-4">
                             {slot.timeRange || "N/A"}
