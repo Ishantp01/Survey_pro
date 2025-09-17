@@ -4,7 +4,7 @@ import connectDB from "./config/db.js";
 import helmet from "helmet";
 
 import userRoutes from "./routes/user.routes.js";
-import formRoutes from './routes/formRoutes.js'
+import formRoutes from "./routes/formRoutes.js";
 
 dotenv.config();
 
@@ -40,7 +40,6 @@ connectDB(process.env.MONGO_URI);
 
 app.use("/api/users", userRoutes);
 app.use("/api/form", formRoutes);
-
 
 app.get("/", (req, res) => res.send("OK"));
 
