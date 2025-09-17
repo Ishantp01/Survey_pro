@@ -31,14 +31,10 @@ function App() {
             <Generateform />
           }
         />
-        {/* Form access route - requires authentication */}
+        {/* Form access route - public access via form link */}
         <Route
           path="/form/:linkId"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
+          element={<Home />}
         />
 
         <Route path="/login" element={<Login />} />
