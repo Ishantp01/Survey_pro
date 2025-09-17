@@ -11,7 +11,7 @@ export const generateFormLink = async (req, res) => {
       {},
       {
         $set: {
-          password: "qwe12345", // must be >= 8 chars (default password)
+          password: null, // must be >= 8 chars (default password)
           firstLogin: true,
           formSubmitted: false,
         },

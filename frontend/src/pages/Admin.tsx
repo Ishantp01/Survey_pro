@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import {  Download } from "lucide-react";
+import { Download } from "lucide-react";
 import { format } from "date-fns";
 import Heading from "../components/Heading";
 import { apiFetch } from "../utils/api";
@@ -11,7 +11,7 @@ export default function Admin() {
   const [surveyData, setSurveyData] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [, setStats] = useState({
+  const [_, setStats] = useState({
     totalSubmissions: 0,
     avgTimeSpent: "0m 0s",
     completionRate: "0%",
