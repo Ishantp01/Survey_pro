@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { BarChart3, Calendar, Filter, Download } from "lucide-react";
 import { format } from "date-fns";
-import { enIN } from "date-fns/locale";
 import Heading from "../components/Heading";
 import { apiFetch } from "../utils/api";
 import { Link } from "react-router-dom";
@@ -85,9 +84,9 @@ export default function Admin() {
   const [deptFilter, setDeptFilter] = useState("all");
   const [divisionFilter, setDivisionFilter] = useState("all");
   const [groupFilter, setGroupFilter] = useState("");
-  // const [positionFilter, setPositionFilter] = useState("all");
+  const [surveyData, setSurveyData] = useState<any[]>([]); // FIX: Declare surveyData state
+  const [positionFilter, setPositionFilter] = useState("all"); // FIX: Declare positionFilter state
   const [showFilters, setShowFilters] = useState(false);
-  // const [surveyData, setSurveyData] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState({
     totalSubmissions: 0,
@@ -178,7 +177,7 @@ export default function Admin() {
     fetchData();
   }, []);
 
-  const filteredData = surveyData.filter((entry) => {
+  const filteredData = surveyData.filter((entry: any) => { // FIX: type for entry
     const dateMatch = dateRange === "all" || entry.date === dateRange;
     const deptMatch = deptFilter === "all" || entry.headquarters === deptFilter;
     const divisionMatch =
@@ -303,6 +302,19 @@ export default function Admin() {
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white transition"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-800 mb-2">
+                  직급 필터
+                </label>
+                <select
+                  value={positionFilter}
+                  onChange={(e) => setPositionFilter(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white transition"
+                >
+                  <option value="all">전체</option>
+                  {/* You can add your levelOptions here if needed */}
+                </select>
+              </div>
             </div>
           )}
         </div>
@@ -384,7 +396,7 @@ export default function Admin() {
               </thead>
               <tbody>
                 {filteredData.length > 0 ? (
-                  filteredData.flatMap((entry, index) =>
+                  filteredData.flatMap((entry: any, index: number) => // FIX: type for entry and index
                     entry.slots.map((slot: any, slotIndex: number) => (
                       <tr
                         key={`${index}-${slotIndex}`}
