@@ -3,6 +3,7 @@ import { Building2, Users, Layers, ChevronDown, Award } from "lucide-react";
 import Heading from "./Heading";
 import { useLocation, useNavigate } from "react-router-dom";
 import { apiFetch } from "../utils/api";
+import { toast, ToastContainer } from "react-toastify";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -125,7 +126,7 @@ export default function Home() {
     }
 
     if (!currentLinkId) {
-      alert("Form link not ready yet. Please generate a form link first.");
+      toast.error("Form link not ready yet. Please generate a form link first.");
       return;
     }
 
@@ -149,15 +150,15 @@ export default function Home() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        alert(data.message);
+       toast.success(data.message);
         // Optionally redirect to a "Thank you" page or open confirmation
         // window.open(`/form/${currentLinkId}/submitted`, "_blank");
       } else {
-        alert(data.message || "Form submission failed.");
+        toast.error(data.message || "Form submission failed.");
       }
     } catch (err) {
       console.error(err);
-      alert("Something went wrong while submitting the form.");
+      toast.error("Something went wrong while submitting the form.");
     } finally {
       setLoading(false);
     }
@@ -292,6 +293,8 @@ export default function Home() {
           </div>
         </form>
       </div>
+            {/* Toast Container */}
+            <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
     </div>
   );
 }

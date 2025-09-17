@@ -31,7 +31,6 @@ function App() {
             <Generateform />
           }
         />
-        {/* Form access route - requires authentication */}
         <Route
           path="/form/:linkId"
           element={
