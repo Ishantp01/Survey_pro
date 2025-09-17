@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useAuth } from "../context/AuthContext";
+// import { useAuth } from "../context/AuthContext";
 import "react-toastify/dist/ReactToastify.css";
 import { Link as LinkIcon, Send, Trash2, ClipboardList } from "lucide-react";
 import LogoutButton from "../components/LogoutButton";
 
 const GenerateForm: React.FC = () => {
-  const { logout } = useAuth();
+  // const { logout } = useAuth();
   const [formLink, setFormLink] = useState<string | null>(null);
   const [formId, setFormId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -51,9 +51,7 @@ const GenerateForm: React.FC = () => {
         );
 
         // Logout user after success
-        setTimeout(() => {
-          logout();
-        }, 2000);
+       
       } else {
         toast.error("❌ Failed to generate form link");
       }
