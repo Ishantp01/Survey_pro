@@ -17,11 +17,66 @@ export default function Admin() {
     completionRate: "0%",
     topDept: "N/A",
   });
+  const [selectedDate, setSelectedDate] = useState<string>("");
+
+  // --- Fetch Data ---
+  const fetchData = async (date?: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem("token");
+      const headers = {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      };
+
+      const url = date
+        ? `/api/form/responses/by-date?date=${date}`
+        : "/api/form/responses/all";
+
+      const res = await apiFetch(url, { method: "GET", headers });
+      const data = await res.json();
+
+      if (!data.success) throw new Error(data.message || "Failed to fetch data");
+
+      const responses = data.responses || [];
+
+      setSurveyData(responses);
+      setStats({
+        totalSubmissions: responses.length,
+        avgTimeSpent: calculateAvgTimeSpent(responses),
+        completionRate: calculateCompletionRate(responses),
+        topDept: calculateTopDept(responses),
+      });
+    } catch (error: any) {
+      console.error("Error fetching survey data:", error);
+      setError(error.message || "Error fetching survey data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const calculateAvgTimeSpent = (_: any[]) => "N/A";
+  const calculateCompletionRate = (_: any[]) => "N/A";
+
+  const calculateTopDept = (data: any[]) => {
+    if (!data.length) return "N/A";
+    const deptCounts = data.reduce((acc: any, curr: any) => {
+      const dept = curr.department || "N/A";
+      acc[dept] = (acc[dept] || 0) + 1;
+      return acc;
+    }, {});
+    return Object.keys(deptCounts).reduce((a, b) =>
+      deptCounts[a] > deptCounts[b] ? a : b
+    );
+  };
 
   // --- CSV Export ---
   const exportToCSV = () => {
-    if (typeof window === "undefined") return; // ✅ prevent SSR crash
-
     if (surveyData.length === 0) {
       alert("내보낼 데이터가 없습니다.");
       return;
@@ -33,33 +88,31 @@ export default function Admin() {
       "업무 1",
       "업무 2",
       "본부",
-      "실",
+      "팀",
       "그룹",
       "직급",
       "이메일",
     ];
 
-    // build csvContent here 👇
     const csvContent = [
-      headers.join(","), // add headers
+      headers.join(","),
       ...surveyData.flatMap((entry) =>
-        (entry.slots || []).map((slot: any) =>
+        (entry.timeSlots || []).map((slot: any) =>
           [
             format(new Date(entry.submittedAt), "yyyy-MM-dd", { locale: enIN }),
             slot.timeRange || "N/A",
-            `"${slot.activity1 || "N/A"}"`,
-            `"${slot.activity2 || "N/A"}"`,
-            `"${entry.headquarters || "N/A"}"`,
-            `"${entry.division || "N/A"}"`,
+            `"${slot.task1 || "N/A"}"`,
+            `"${slot.task2 || "N/A"}"`,
+            `"${entry.department || "N/A"}"`,
+            `"${entry.team || "N/A"}"`,
             `"${entry.group || "N/A"}"`,
             `"${entry.position || "N/A"}"`,
-            `"${entry.email || entry.userEmail || "N/A"}"`,
+            `"${entry.email || "N/A"}"`,
           ].join(",")
         )
       ),
     ].join("\n");
 
-    // ✅ correct usage
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -69,87 +122,6 @@ export default function Admin() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const token = localStorage.getItem("token");
-        const headers = {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        };
-
-        const [timeslotRes, formRes] = await Promise.all([
-          apiFetch("/api/timeslot/all", { method: "GET", headers }),
-          apiFetch("/api/form/responses/all", { method: "GET", headers }),
-        ]);
-
-        const timeslotData = await timeslotRes.json();
-        const formData = await formRes.json();
-
-        console.log("Timeslot Data:", timeslotData);
-        console.log("Form Data:", formData);
-
-        // ✅ Adjust keys to match backend
-        const timeslotList = timeslotData.submissions || [];
-        const formList = formData.responses || [];
-
-        // Merge timeslot + form
-        const mergedData = timeslotList.map((timeslot: any) => {
-          const form = formList.find(
-            (f: any) => f.email === timeslot.userEmail
-          ) || {
-            headquarters: "N/A",
-            division: "N/A",
-            group: "N/A",
-            position: "N/A",
-            email: timeslot.userEmail,
-            submittedAt: timeslot.submittedAt || Date.now(),
-          };
-
-          return {
-            ...timeslot,
-            ...form,
-            slots: timeslot.slots || [],
-            submittedAt: form.submittedAt || timeslot.submittedAt || Date.now(),
-          };
-        });
-
-        console.log("Merged Data:", mergedData);
-
-        setSurveyData(mergedData);
-        setStats({
-          totalSubmissions: mergedData.length,
-          avgTimeSpent: calculateAvgTimeSpent(mergedData),
-          completionRate: calculateCompletionRate(mergedData),
-          topDept: calculateTopDept(mergedData),
-        });
-      } catch (error: any) {
-        console.error("Error fetching survey data:", error);
-        setError(error.message || "Error fetching survey data");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
-  const calculateAvgTimeSpent = (_: any[]) => "N/A";
-  const calculateCompletionRate = (_: any[]) => "N/A";
-
-  const calculateTopDept = (data: any[]) => {
-    if (!data.length) return "N/A";
-    const deptCounts = data.reduce((acc: any, curr: any) => {
-      const dept = curr.headquarters || "N/A";
-      acc[dept] = (acc[dept] || 0) + 1;
-      return acc;
-    }, {});
-    return Object.keys(deptCounts).reduce((a, b) =>
-      deptCounts[a] > deptCounts[b] ? a : b
-    );
   };
 
   return (
@@ -164,6 +136,33 @@ export default function Admin() {
             Generate Form Link
           </button>
         </Link>
+
+        {/* --- Date Filter --- */}
+        <div className="mb-6 flex items-center gap-4">
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => {
+              setSelectedDate(e.target.value);
+              if (e.target.value) {
+                fetchData(e.target.value);
+              } else {
+                fetchData(); // show all if cleared
+              }
+            }}
+            className="border border-gray-300 rounded-lg px-4 py-2 text-sm"
+          />
+          <button
+            onClick={() => {
+              setSelectedDate("");
+              fetchData();
+            }}
+            className="bg-gray-200 px-3 py-2 rounded-lg text-sm hover:bg-gray-300"
+          >
+            Reset
+          </button>
+        </div>
+
         <div className="mb-8 flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-extrabold text-sky-700 mb-2">
@@ -188,45 +187,6 @@ export default function Admin() {
 
         {loading && <div className="text-center text-gray-600">Loading...</div>}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white shadow-xl rounded-xl p-6 border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-gray-800">총 제출 수</h3>
-              <BarChart3 className="w-5 h-5 text-sky-700" />
-            </div>
-            <p className="text-3xl font-extrabold text-sky-700">
-              {stats.totalSubmissions}
-            </p>
-          </div>
-          <div className="bg-white shadow-xl rounded-xl p-6 border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-gray-800">
-                평균 소요 시간
-              </h3>
-              <Calendar className="w-5 h-5 text-sky-700" />
-            </div>
-            <p className="text-3xl font-extrabold text-sky-700">
-              {stats.avgTimeSpent}
-            </p>
-          </div>
-          <div className="bg-white shadow-xl rounded-xl p-6 border border-gray-100">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-gray-800">완료율</h3>
-              <BarChart3 className="w-5 h-5 text-sky-700" />
-            </div>
-            <p className="text-3xl font-extrabold text-sky-700">
-              {stats.completionRate}
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-white shadow-xl rounded-xl p-6 mb-8 border border-gray-100">
-          <h3 className="text-lg font-semibold text-sky-600 mb-4">상위 본부</h3>
-          <p className="text-2xl font-extrabold text-sky-700">
-            {stats.topDept}
-          </p>
-        </div>
-
         <div className="bg-white shadow-xl rounded-xl p-6 border border-gray-100">
           <h3 className="text-lg font-semibold text-sky-600 mb-4">
             제출 데이터
@@ -235,39 +195,21 @@ export default function Admin() {
             <table className="w-full text-sm text-left text-gray-700">
               <thead className="text-xs text-gray-800 uppercase bg-gray-50">
                 <tr>
-                  <th scope="col" className="px-6 py-3">
-                    날짜
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    시간
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    업무 1
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    업무 2
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    본부
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    실
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    그룹
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    직급
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    이메일
-                  </th>
+                  <th className="px-6 py-3">날짜</th>
+                  <th className="px-6 py-3">시간</th>
+                  <th className="px-6 py-3">업무 1</th>
+                  <th className="px-6 py-3">업무 2</th>
+                  <th className="px-6 py-3">본부</th>
+                  <th className="px-6 py-3">팀</th>
+                  <th className="px-6 py-3">그룹</th>
+                  <th className="px-6 py-3">직급</th>
+                  <th className="px-6 py-3">이메일</th>
                 </tr>
               </thead>
               <tbody>
                 {surveyData.length > 0 ? (
                   surveyData.flatMap((entry, index) =>
-                    (entry.slots || []).map((slot: any, slotIndex: number) => (
+                    (entry.timeSlots || []).map((slot: any, slotIndex: number) => (
                       <tr
                         key={`${index}-${slotIndex}`}
                         className="border-b border-gray-200 hover:bg-gray-50"
@@ -278,17 +220,13 @@ export default function Admin() {
                           })}
                         </td>
                         <td className="px-6 py-4">{slot.timeRange || "N/A"}</td>
-                        <td className="px-6 py-4">{slot.activity1 || "N/A"}</td>
-                        <td className="px-6 py-4">{slot.activity2 || "N/A"}</td>
-                        <td className="px-6 py-4">
-                          {entry.headquarters || "N/A"}
-                        </td>
-                        <td className="px-6 py-4">{entry.division || "N/A"}</td>
+                        <td className="px-6 py-4">{slot.task1 || "N/A"}</td>
+                        <td className="px-6 py-4">{slot.task2 || "N/A"}</td>
+                        <td className="px-6 py-4">{entry.department || "N/A"}</td>
+                        <td className="px-6 py-4">{entry.team || "N/A"}</td>
                         <td className="px-6 py-4">{entry.group || "N/A"}</td>
                         <td className="px-6 py-4">{entry.position || "N/A"}</td>
-                        <td className="px-6 py-4">
-                          {entry.email || entry.userEmail || "N/A"}
-                        </td>
+                        <td className="px-6 py-4">{entry.email || "N/A"}</td>
                       </tr>
                     ))
                   )

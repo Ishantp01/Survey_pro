@@ -3,9 +3,11 @@ import { User, Lock } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import Heading from "../components/Heading";
 import { apiFetch } from "../utils/api";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,6 +32,13 @@ export default function Login() {
       if (res.status === 420 || (res.ok && data && data.success)) {
         if (data && data.token) {
           login(data.token);
+
+          // Check for redirect_after_login
+          const redirectPath = localStorage.getItem("redirect_after_login");
+          if (redirectPath) {
+            localStorage.removeItem("redirect_after_login");
+            navigate(redirectPath, { replace: true });
+          }
         } else {
           setError("Unexpected response from server");
         }

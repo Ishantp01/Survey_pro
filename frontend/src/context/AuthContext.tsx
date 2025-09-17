@@ -26,32 +26,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const savedToken = localStorage.getItem("auth_token");
+    // Check only for user_token for user authentication
+    const savedUserToken = localStorage.getItem("user_token");
     const savedRole = localStorage.getItem("auth_role") as UserRole;
 
-    if (savedToken && savedRole) {
+    if (savedUserToken && savedRole === "user") {
       setIsAuthenticated(true);
-      setRole(savedRole);
+      setRole("user");
+    } else if (localStorage.getItem("admin_token") && savedRole === "admin") {
+      setIsAuthenticated(true);
+      setRole("admin");
     }
     setIsReady(true);
   }, []);
 
   const login = (token: string, role: UserRole = "user") => {
-    localStorage.setItem("auth_token", token);
-    localStorage.setItem("auth_role", role);
-
-    setIsAuthenticated(true);
-    setRole(role);
-
     if (role === "admin") {
+      localStorage.setItem("admin_token", token);
+      localStorage.setItem("auth_role", "admin");
+      setIsAuthenticated(true);
+      setRole("admin");
       navigate("/admin", { replace: true });
     } else {
+      localStorage.setItem("user_token", token);
+      localStorage.setItem("auth_role", "user");
+      setIsAuthenticated(true);
+      setRole("user");
       navigate("/", { replace: true });
     }
   };
 
   const logout = () => {
-    localStorage.removeItem("auth_token");
+    localStorage.removeItem("user_token");
+    localStorage.removeItem("admin_token");
     localStorage.removeItem("auth_role");
     setIsAuthenticated(false);
     setRole(null);
