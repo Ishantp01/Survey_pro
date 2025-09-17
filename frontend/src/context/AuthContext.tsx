@@ -12,7 +12,7 @@ type UserRole = "user" | "admin" | null;
 type AuthContextValue = {
   isAuthenticated: boolean;
   role: UserRole;
-  login: (token: string, role: UserRole) => void;
+  login: (token: string, role?: UserRole) => void;
   logout: () => void;
   isReady: boolean;
 };
@@ -36,9 +36,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsReady(true);
   }, []);
 
-  const login = (token: string, role: UserRole) => {
+  const login = (token: string, role: UserRole = "user") => {
     localStorage.setItem("auth_token", token);
-    localStorage.setItem("auth_role", role || "user");
+    localStorage.setItem("auth_role", role);
 
     setIsAuthenticated(true);
     setRole(role);

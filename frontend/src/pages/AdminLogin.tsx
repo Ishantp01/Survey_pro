@@ -9,14 +9,14 @@ const AdminLogin = () => {
     username: "",
     password: "",
   });
-  const { adminLogin } = useAuth();
+  const { login } = useAuth();
 
   const handleLogin = () => {
     if (
       credentials.username === "admin" &&
       credentials.password === "admin123"
     ) {
-      adminLogin("admin_dummy_token");
+      login("admin_dummy_token", "admin"); // Pass "admin" as role
       toast.success("✅ Logged in successfully!");
     } else {
       toast.error("❌ Invalid admin credentials");
