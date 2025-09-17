@@ -43,7 +43,7 @@ export default function Login() {
     }
   };
   return (
-    <div className="min-h-screen flex-col bg-gradient-to-br from-green-50 to-white flex justify-center items-center px-4 py-10">
+    <div className="min-h-screen flex-col bg-gradient-to-br from-sky-50 to-white flex justify-center items-center px-4 py-10">
       <Heading />
       <div className="bg-white shadow-2xl rounded-2xl p-10 max-w-3xl w-full border border-gray-100">
         {error && (
@@ -59,7 +59,7 @@ export default function Login() {
           {/* Username Field */}
           <div>
             <label className="block text-sm font-medium text-gray-800 mb-2 flex items-center gap-2">
-              <User className="w-4 h-4 text-green-700" />
+              <User className="w-4 h-4 text-sky-700" />
               "조사 관련 안내 메일을 받으신 이메일 주소를 입력해
               주세요(예:yoonk.lee@poscointl.com)"
             </label>
@@ -69,14 +69,14 @@ export default function Login() {
               placeholder="ID를 입력해 주세요"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white transition"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-600 bg-gray-50 hover:bg-white transition"
             />
           </div>
 
           {/* Password Field */}
           <div>
             <label className="block text-sm font-medium text-gray-800 mb-2 flex items-center gap-2">
-              <Lock className="w-4 h-4 text-green-700" />
+              <Lock className="w-4 h-4 text-sky-700" />
               임시비밀 번호 입력
             </label>
             <input
@@ -84,7 +84,7 @@ export default function Login() {
               placeholder="비밀번호를 입력해 주세요"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white transition"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-600 bg-gray-50 hover:bg-white transition"
             />
           </div>
 
@@ -92,7 +92,7 @@ export default function Login() {
           <div className="flex justify-center">
             <button
               type="submit"
-              className="bg-green-700 cursor-pointer text-white font-semibold px-10 py-3 rounded-lg shadow-lg hover:bg-green-800 transition transform hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed"
+              className="bg-sky-700 cursor-pointer text-white font-semibold px-10 py-3 rounded-lg shadow-lg hover:bg-sky-800 transition transform hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed"
               disabled={loading}
             >
               {loading ? "로그인 중..." : "로그인"}
