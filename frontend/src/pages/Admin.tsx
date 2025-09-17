@@ -32,7 +32,7 @@ export default function Admin() {
 
       const url = date
         ? `/api/form/responses/by-date?date=${date}`
-        : "/api/form/responses/all";
+        : "/api/form/responses-all";
 
       const res = await apiFetch(url, { method: "GET", headers });
       const data = await res.json();
