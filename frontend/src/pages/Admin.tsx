@@ -151,8 +151,9 @@ export default function Admin() {
     fetchData();
   }, []);
 
-  const calculateAvgTimeSpent = (data: any[]) => "N/A"; // Placeholder
-  const calculateCompletionRate = (data: any[]) => "N/A"; // Placeholder
+  const calculateAvgTimeSpent = (_: any[]) => "N/A";
+  const calculateCompletionRate = (_: any[]) => "N/A";
+
   const calculateTopDept = (data: any[]) => {
     if (!data.length) return "N/A";
     const deptCounts = data.reduce((acc: any, curr: any) => {
