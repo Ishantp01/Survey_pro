@@ -2,23 +2,43 @@ import Form from "../models/Form.js";
 import FormResponse from "../models/FormResponse.js";
 import crypto from "crypto";
 
-// Generate new form link
+// Generate new form link and reset users
 export const generateFormLink = async (req, res) => {
   try {
-    // deactivate all old forms
+    // Reset all users so they can re-submit
+    await userModel.updateMany(
+      {},
+      {
+        $set: {
+          password: "qwe12345", // must be >= 8 chars (default password)
+          firstLogin: true,
+          formSubmitted: false,
+        },
+      }
+    );
+
+    // 2️⃣ Deactivate old form links
     await Form.updateMany({}, { $set: { active: false } });
 
-    const token = crypto.randomBytes(16).toString("hex");
-    const link = `${process.env.FRONTEND_URL}/form/${token}`;
+    // 3️⃣ Generate new unique form link
+    const linkId = crypto.randomBytes(16).toString("hex");
+    const link = `${process.env.FRONTEND_URL || "http://localhost:5173"}/form/${linkId}`;
 
     const newForm = new Form({ link, active: true });
     await newForm.save();
 
-    res.json({ success: true, form: newForm });
-  } catch (err) {
-    res.status(500).json({ success: false, message: "Error generating form link", error: err.message });
+    // 4️⃣ Respond
+    res.status(201).json({
+      success: true,
+      message: "Form link generated successfully. All users have been reset.",
+      link,
+      linkId,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
-}
+};
 
 // Submit form response
 export const submitFormResponse = async (req, res) => {
