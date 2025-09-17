@@ -1,17 +1,19 @@
 import nodemailer from "nodemailer";
 
-// Configure transporter for Gmail
+// Configure transporter for Outlook / Office365
 const transporter = nodemailer.createTransport({
-  service: "Gmail",
+  host: "smtp.office365.com",   
+  port: 587,                    
+  secure: false,                
   auth: {
-    user: "himankjanjire4@gmail.com", // your Gmail address
-    pass: "ziep qatb plrl pyfv"  // your Gmail App Password
-  }
+    user: "lcy@learning-crew.com", 
+    pass: "zlsywqyqwygfrzcm"  
+  },
 });
 
 export const sendEmail = async (to, subject, text, html) => {
   const mailOptions = {
-    from: process.env.GMAIL_USER,
+    from: "lcy@learning-crew.com",
     to,
     subject,
     text,
