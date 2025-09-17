@@ -100,7 +100,7 @@ export default function Admin() {
       ...surveyData.flatMap((entry) =>
         (entry.timeSlots || []).map((slot: any) =>
           [
-            format(new Date(entry.submittedAt), "yyyy-MM-dd", { locale: enIN }),
+            format(new Date(entry.clientDate), "yyyy-MM-dd", { locale: enIN }),
             slot.timeRange || "N/A",
             `"${slot.task1 || "N/A"}"`,
             `"${slot.task2 || "N/A"}"`,
