@@ -30,8 +30,8 @@ const GenerateForm: React.FC = () => {
     try {
       setLoading(true);
       const res = await axios.post(
-        // "https://survey-pro-44pf.onrender.com/api/form/generate",
-        "http://localhost:5000/api/form/generate",
+        "https://survey-pro-44pf.onrender.com/api/form/generate",
+        // "http://localhost:5000/api/form/generate",
         {}
       );
       if (res.data.success) {
@@ -51,7 +51,6 @@ const GenerateForm: React.FC = () => {
         );
 
         // Logout user after success
-       
       } else {
         toast.error("❌ Failed to generate form link");
       }
