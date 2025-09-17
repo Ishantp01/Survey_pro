@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { BarChart3, Calendar, Filter, Download } from "lucide-react";
+import { BarChart3, Calendar, Download } from "lucide-react";
 import { format } from "date-fns";
 import { enIN } from "date-fns/locale";
 import Heading from "../components/Heading";
@@ -7,6 +7,7 @@ import { apiFetch } from "../utils/api";
 import { Link } from "react-router-dom";
 
 const workingDays = [
+  "2025-09-17",
   "2025-09-18",
   "2025-09-19",
   "2025-09-22",
@@ -20,75 +21,10 @@ const workingDays = [
   "2025-10-02",
 ];
 
-const headOptions = [
-  "사장직속",
-  "경영기획본부",
-  "경영지원본부",
-  "철강본부",
-  "소재바이오본부",
-  "에너지사업본부",
-  "가스사업본부",
-];
-
-const options: { [key: string]: string[] } = {
-  사장직속: ["-"],
-  경영기획본부: [
-    "본부 직속",
-    "경영기획실",
-    "사업관리실",
-    "재무IR실",
-    "국제금융실",
-    "인사문화실",
-    "디지털혁신실",
-    "법무실",
-    "커뮤니케이션실",
-  ],
-  경영지원본부: [
-    "본부 직속",
-    "구매물류그룹(미얀마)",
-    "생산운영그룹(미얀마)",
-    "설비기술그룹(미얀마)",
-    "인사행정그룹(미얀마)",
-    "재무회계그룹(미얀마)",
-  ],
-  철강본부: [
-    "본부 직속",
-    "열연조강사업실",
-    "후판선재사업실",
-    "냉연사업실",
-    "스테인리스사업실",
-    "에너지인프라강재사업실",
-    "자동차소재사업실",
-    "모빌리티사업실",
-  ],
-  소재바이오본부: [
-    "본부 직속",
-    "원료소재사업실",
-    "식량사업개발실",
-    "식량사업실",
-    "산업소재사업실",
-  ],
-  에너지사업본부: [
-    "본부 직속",
-    "발전사업개발실",
-    "LNG사업실",
-    "터미널사업실",
-    "에너지기술지원실",
-    "에너지운영실",
-  ],
-  가스사업본부: ["본부 직속", "E&P사업실", "가스개발사업실", "가스전운영실"],
-};
-
 export default function Admin() {
-  // const [activeTab] = useState("surveyPeriod");
-  const [dateRange, setDateRange] = useState("all");
-  const [deptFilter, setDeptFilter] = useState("all");
-  const [divisionFilter, setDivisionFilter] = useState("all");
-  const [groupFilter, setGroupFilter] = useState("");
-  const [positionFilter, setPositionFilter] = useState("all");
-  const [showFilters, setShowFilters] = useState(false);
   const [surveyData, setSurveyData] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState({
     totalSubmissions: 0,
     avgTimeSpent: "0m 0s",
@@ -96,10 +32,11 @@ export default function Admin() {
     topDept: "N/A",
   });
 
-  const toggleFilters = () => setShowFilters(!showFilters);
-
+  // --- CSV Export ---
   const exportToCSV = () => {
-    if (filteredData.length === 0) {
+    if (typeof window === "undefined") return; // ✅ prevent SSR crash
+
+    if (surveyData.length === 0) {
       alert("내보낼 데이터가 없습니다.");
       return;
     }
@@ -113,85 +50,120 @@ export default function Admin() {
       "실",
       "그룹",
       "직급",
+      "이메일",
     ];
+
+    // build csvContent here 👇
     const csvContent = [
-      headers.join(","),
-      ...filteredData.flatMap((entry) =>
-        entry.slots.map((slot: any) =>
+      headers.join(","), // add headers
+      ...surveyData.flatMap((entry) =>
+        (entry.slots || []).map((slot: any) =>
           [
-            // format(
-            //   utcToZonedTime(new Date(entry.date), "Asia/Kolkata"),
-            //   "yyyy-MM-dd",
-            //   { locale: enIN }
-            // ),
-            slot.timeRange,
-            `"${slot.task1}"`,
-            `"${slot.task2}"`,
-            `"${entry.headquarters}"`,
-            `"${entry.division}"`,
-            `"${entry.group}"`,
-            `"${entry.position}"`,
+            format(new Date(entry.submittedAt), "yyyy-MM-dd", { locale: enIN }),
+            slot.timeRange || "N/A",
+            `"${slot.activity1 || "N/A"}"`,
+            `"${slot.activity2 || "N/A"}"`,
+            `"${entry.headquarters || "N/A"}"`,
+            `"${entry.division || "N/A"}"`,
+            `"${entry.group || "N/A"}"`,
+            `"${entry.position || "N/A"}"`,
+            `"${entry.email || entry.userEmail || "N/A"}"`,
           ].join(",")
         )
       ),
     ].join("\n");
 
+    // ✅ correct usage
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute(
-      "download",
-      `survey_data_${format(new Date(), "yyyy-MM-dd")}.csv`
-    );
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `survey_data_${format(new Date(), "yyyy-MM-dd")}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        setError(null);
-        const response = await apiFetch("/api/survey-data", {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
+        const token = localStorage.getItem("token");
+        const headers = {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        };
+
+        const [timeslotRes, formRes] = await Promise.all([
+          apiFetch("/api/timeslot/all", { method: "GET", headers }),
+          apiFetch("/api/form/responses/all", { method: "GET", headers }),
+        ]);
+
+        const timeslotData = await timeslotRes.json();
+        const formData = await formRes.json();
+
+        console.log("Timeslot Data:", timeslotData);
+        console.log("Form Data:", formData);
+
+        // ✅ Adjust keys to match backend
+        const timeslotList = timeslotData.submissions || [];
+        const formList = formData.responses || [];
+
+        // Merge timeslot + form
+        const mergedData = timeslotList.map((timeslot: any) => {
+          const form = formList.find(
+            (f: any) => f.email === timeslot.userEmail
+          ) || {
+            headquarters: "N/A",
+            division: "N/A",
+            group: "N/A",
+            position: "N/A",
+            email: timeslot.userEmail,
+            submittedAt: timeslot.submittedAt || Date.now(),
+          };
+
+          return {
+            ...timeslot,
+            ...form,
+            slots: timeslot.slots || [],
+            submittedAt: form.submittedAt || timeslot.submittedAt || Date.now(),
+          };
         });
-        const result = await response.json();
-        if (response.ok && result.success) {
-          setSurveyData(result.data || []);
-          setStats({
-            totalSubmissions: result.stats?.totalSubmissions || 0,
-            avgTimeSpent: result.stats?.avgTimeSpent || "0m 0s",
-            completionRate: result.stats?.completionRate || "0%",
-            topDept: result.stats?.topDept || "N/A",
-          });
-        } else {
-          setError(result.message || "Failed to fetch survey data");
-        }
-      } catch (error) {
+
+        console.log("Merged Data:", mergedData);
+
+        setSurveyData(mergedData);
+        setStats({
+          totalSubmissions: mergedData.length,
+          avgTimeSpent: calculateAvgTimeSpent(mergedData),
+          completionRate: calculateCompletionRate(mergedData),
+          topDept: calculateTopDept(mergedData),
+        });
+      } catch (error: any) {
         console.error("Error fetching survey data:", error);
-        setError("Error fetching survey data");
+        setError(error.message || "Error fetching survey data");
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
   }, []);
 
-  const filteredData = surveyData.filter((entry) => {
-    const dateMatch = dateRange === "all" || entry.date === dateRange;
-    const deptMatch = deptFilter === "all" || entry.headquarters === deptFilter;
-    const divisionMatch =
-      divisionFilter === "all" || entry.division === divisionFilter;
-    const groupMatch =
-      groupFilter === "" ||
-      entry.group.toLowerCase().includes(groupFilter.toLowerCase());
-    const positionMatch =
-      positionFilter === "all" || entry.position === positionFilter;
-    return (
-      dateMatch && deptMatch && divisionMatch && groupMatch && positionMatch
+  const calculateAvgTimeSpent = (data: any[]) => "N/A"; // Placeholder
+  const calculateCompletionRate = (data: any[]) => "N/A"; // Placeholder
+  const calculateTopDept = (data: any[]) => {
+    if (!data.length) return "N/A";
+    const deptCounts = data.reduce((acc: any, curr: any) => {
+      const dept = curr.headquarters || "N/A";
+      acc[dept] = (acc[dept] || 0) + 1;
+      return acc;
+    }, {});
+    return Object.keys(deptCounts).reduce((a, b) =>
+      deptCounts[a] > deptCounts[b] ? a : b
     );
-  });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-white px-4 py-10">
@@ -224,88 +196,7 @@ export default function Admin() {
           </div>
         )}
 
-        <div className="bg-white shadow-xl rounded-xl p-6 mb-8 border border-gray-100">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-green-600 flex items-center gap-2">
-              <Filter className="w-4 h-4" />
-              필터
-            </h2>
-            <button
-              onClick={toggleFilters}
-              className="text-green-700 hover:text-green-800"
-            >
-              {showFilters ? "숨기기" : "보이기"}
-            </button>
-          </div>
-          {showFilters && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-800 mb-2">
-                  기간
-                </label>
-                <select
-                  value={dateRange}
-                  onChange={(e) => setDateRange(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white transition"
-                >
-                  <option value="all">전체 (9월 18일 ~ 10월 2일)</option>
-                  {workingDays.map((day) => (
-                    <option key={day} value={day}>
-                      {day}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-800 mb-2">
-                  본부 필터
-                </label>
-                <select
-                  value={deptFilter}
-                  onChange={(e) => setDeptFilter(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white transition"
-                >
-                  <option value="all">전체</option>
-                  {headOptions.map((dept) => (
-                    <option key={dept} value={dept}>
-                      {dept}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-800 mb-2">
-                  실 필터
-                </label>
-                <select
-                  value={divisionFilter}
-                  onChange={(e) => setDivisionFilter(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white transition"
-                >
-                  <option value="all">전체</option>
-                  {deptFilter !== "all" &&
-                    options[deptFilter].map((div) => (
-                      <option key={div} value={div}>
-                        {div}
-                      </option>
-                    ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-800 mb-2">
-                  그룹 필터
-                </label>
-                <input
-                  type="text"
-                  value={groupFilter}
-                  onChange={(e) => setGroupFilter(e.target.value)}
-                  placeholder="그룹 검색"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white transition"
-                />
-              </div>
-            </div>
-          )}
-        </div>
+        {loading && <div className="text-center text-gray-600">Loading...</div>}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white shadow-xl rounded-xl p-6 border border-gray-100">
@@ -350,7 +241,7 @@ export default function Admin() {
 
         <div className="bg-white shadow-xl rounded-xl p-6 border border-gray-100">
           <h3 className="text-lg font-semibold text-green-600 mb-4">
-            제출 추이 (9월 18일 ~ 10월 2일)
+            제출 데이터
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left text-gray-700">
@@ -380,40 +271,43 @@ export default function Admin() {
                   <th scope="col" className="px-6 py-3">
                     직급
                   </th>
+                  <th scope="col" className="px-6 py-3">
+                    이메일
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {filteredData.length > 0 ? (
-                  filteredData.flatMap((entry, index) =>
-                    entry.slots.map((slot: any, slotIndex: number) => (
+                {surveyData.length > 0 ? (
+                  surveyData.flatMap((entry, index) =>
+                    (entry.slots || []).map((slot: any, slotIndex: number) => (
                       <tr
                         key={`${index}-${slotIndex}`}
                         className="border-b border-gray-200 hover:bg-gray-50"
                       >
                         <td className="px-6 py-4">
-                          {/* {format(
-                            utcToZonedTime(
-                              new Date(entry.date),
-                              "Asia/Kolkata"
-                            ),
-                            "yyyy-MM-dd",
-                            { locale: enIN }
-                          )} */}
+                          {format(new Date(entry.submittedAt), "yyyy-MM-dd", {
+                            locale: enIN,
+                          })}
                         </td>
-                        <td className="px-6 py-4">{slot.timeRange}</td>
-                        <td className="px-6 py-4">{slot.task1}</td>
-                        <td className="px-6 py-4">{slot.task2}</td>
-                        <td className="px-6 py-4">{entry.headquarters}</td>
-                        <td className="px-6 py-4">{entry.division}</td>
-                        <td className="px-6 py-4">{entry.group}</td>
-                        <td className="px-6 py-4">{entry.position}</td>
+                        <td className="px-6 py-4">{slot.timeRange || "N/A"}</td>
+                        <td className="px-6 py-4">{slot.activity1 || "N/A"}</td>
+                        <td className="px-6 py-4">{slot.activity2 || "N/A"}</td>
+                        <td className="px-6 py-4">
+                          {entry.headquarters || "N/A"}
+                        </td>
+                        <td className="px-6 py-4">{entry.division || "N/A"}</td>
+                        <td className="px-6 py-4">{entry.group || "N/A"}</td>
+                        <td className="px-6 py-4">{entry.position || "N/A"}</td>
+                        <td className="px-6 py-4">
+                          {entry.email || entry.userEmail || "N/A"}
+                        </td>
                       </tr>
                     ))
                   )
                 ) : (
                   <tr>
                     <td
-                      colSpan={8}
+                      colSpan={9}
                       className="px-6 py-4 text-center text-gray-600"
                     >
                       데이터가 없습니다.
@@ -428,6 +322,3 @@ export default function Admin() {
     </div>
   );
 }
-// function utcToZonedTime(arg0: Date, arg1: string): string | number | Date {
-//   throw new Error("Function not implemented.");
-// }

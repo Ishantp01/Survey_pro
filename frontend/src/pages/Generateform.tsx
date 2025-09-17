@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -63,7 +62,6 @@ const GenerateForm: React.FC = () => {
     }
   };
 
-
   // 🔹 Send form invites
   const sendFormInvites = async () => {
     if (!formLink) {
@@ -85,47 +83,43 @@ const GenerateForm: React.FC = () => {
     }
   };
 
-const deleteForm = async () => {
-  if (!formId) {
-    toast.error("⚠️ No form available to delete");
-    return;
-  }
-
-  const confirmed = window.confirm(
-    "⚠️ Are you sure you want to delete this form response and its link?"
-  );
-  if (!confirmed) return;
-
-  try {
-    setLoading(true);
-
-    const res = await axios.delete(
-      `https://survey-pro-44pf.onrender.com/api/form/responses/${formId}`
-    );
-
-    if (res.data.success) {
-      setFormLink(null);
-      setFormId(null);
-      localStorage.removeItem("formLink");
-      localStorage.removeItem("formId");
-
-      toast.success(
-        res.data.message || "✅ Form response and link deleted successfully!"
-      );
-    } else {
-      toast.error("❌ Failed to delete form");
+  const deleteForm = async () => {
+    if (!formId) {
+      toast.error("⚠️ No form available to delete");
+      return;
     }
-  } catch (err: any) {
-    console.error("❌ Delete Error:", err);
-    toast.error(err.response?.data?.message || "❌ Error deleting form");
-  } finally {
-    setLoading(false);
-  }
-};
 
+    const confirmed = window.confirm(
+      "⚠️ Are you sure you want to delete this form response and its link?"
+    );
+    if (!confirmed) return;
 
+    try {
+      setLoading(true);
 
+      const res = await axios.delete(
+        `https://survey-pro-44pf.onrender.com/api/form/responses/${formId}`
+      );
 
+      if (res.data.success) {
+        setFormLink(null);
+        setFormId(null);
+        localStorage.removeItem("formLink");
+        localStorage.removeItem("formId");
+
+        toast.success(
+          res.data.message || "✅ Form response and link deleted successfully!"
+        );
+      } else {
+        toast.error("❌ Failed to delete form");
+      }
+    } catch (err: any) {
+      console.error("❌ Delete Error:", err);
+      toast.error(err.response?.data?.message || "❌ Error deleting form");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-sky-50 to-sky-100 flex items-center justify-center p-4">
@@ -178,7 +172,6 @@ const deleteForm = async () => {
               rel="noopener noreferrer"
               className="text-blue-600 underline break-all flex items-center gap-1"
             >
-            
               {formLink}
             </a>
           </div>
