@@ -394,7 +394,7 @@ export default function Home() {
       const token = localStorage.getItem("token");
 
       // Single API call
-      const response = await apiFetch("http:localhost:5000/api/form/submit", {
+      const response = await apiFetch(`/api/form/submit`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

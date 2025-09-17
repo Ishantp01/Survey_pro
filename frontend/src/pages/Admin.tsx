@@ -37,7 +37,8 @@ export default function Admin() {
       const res = await apiFetch(url, { method: "GET", headers });
       const data = await res.json();
 
-      if (!data.success) throw new Error(data.message || "Failed to fetch data");
+      if (!data.success)
+        throw new Error(data.message || "Failed to fetch data");
 
       const responses = data.responses || [];
 
@@ -209,26 +210,34 @@ export default function Admin() {
               <tbody>
                 {surveyData.length > 0 ? (
                   surveyData.flatMap((entry, index) =>
-                    (entry.timeSlots || []).map((slot: any, slotIndex: number) => (
-                      <tr
-                        key={`${index}-${slotIndex}`}
-                        className="border-b border-gray-200 hover:bg-gray-50"
-                      >
-                        <td className="px-6 py-4">
-                          {format(new Date(entry.submittedAt), "yyyy-MM-dd", {
-                            locale: enIN,
-                          })}
-                        </td>
-                        <td className="px-6 py-4">{slot.timeRange || "N/A"}</td>
-                        <td className="px-6 py-4">{slot.task1 || "N/A"}</td>
-                        <td className="px-6 py-4">{slot.task2 || "N/A"}</td>
-                        <td className="px-6 py-4">{entry.department || "N/A"}</td>
-                        <td className="px-6 py-4">{entry.team || "N/A"}</td>
-                        <td className="px-6 py-4">{entry.group || "N/A"}</td>
-                        <td className="px-6 py-4">{entry.position || "N/A"}</td>
-                        <td className="px-6 py-4">{entry.email || "N/A"}</td>
-                      </tr>
-                    ))
+                    (entry.timeSlots || []).map(
+                      (slot: any, slotIndex: number) => (
+                        <tr
+                          key={`${index}-${slotIndex}`}
+                          className="border-b border-gray-200 hover:bg-gray-50"
+                        >
+                          <td className="px-6 py-4">
+                            {format(new Date(entry.submittedAt), "yyyy-MM-dd", {
+                              locale: enIN,
+                            })}
+                          </td>
+                          <td className="px-6 py-4">
+                            {slot.timeRange || "N/A"}
+                          </td>
+                          <td className="px-6 py-4">{slot.task1 || "N/A"}</td>
+                          <td className="px-6 py-4">{slot.task2 || "N/A"}</td>
+                          <td className="px-6 py-4">
+                            {entry.department || "N/A"}
+                          </td>
+                          <td className="px-6 py-4">{entry.team || "N/A"}</td>
+                          <td className="px-6 py-4">{entry.group || "N/A"}</td>
+                          <td className="px-6 py-4">
+                            {entry.position || "N/A"}
+                          </td>
+                          <td className="px-6 py-4">{entry.email || "N/A"}</td>
+                        </tr>
+                      )
+                    )
                   )
                 ) : (
                   <tr>
