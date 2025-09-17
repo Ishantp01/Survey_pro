@@ -119,11 +119,11 @@ export default function Admin() {
       ...filteredData.flatMap((entry) =>
         entry.slots.map((slot: any) =>
           [
-            format(
-              utcToZonedTime(new Date(entry.date), "Asia/Kolkata"),
-              "yyyy-MM-dd",
-              { locale: enIN }
-            ),
+            // format(
+            //   utcToZonedTime(new Date(entry.date), "Asia/Kolkata"),
+            //   "yyyy-MM-dd",
+            //   { locale: enIN }
+            // ),
             slot.timeRange,
             `"${slot.task1}"`,
             `"${slot.task2}"`,
@@ -391,14 +391,14 @@ export default function Admin() {
                         className="border-b border-gray-200 hover:bg-gray-50"
                       >
                         <td className="px-6 py-4">
-                          {format(
+                          {/* {format(
                             utcToZonedTime(
                               new Date(entry.date),
                               "Asia/Kolkata"
                             ),
                             "yyyy-MM-dd",
                             { locale: enIN }
-                          )}
+                          )} */}
                         </td>
                         <td className="px-6 py-4">{slot.timeRange}</td>
                         <td className="px-6 py-4">{slot.task1}</td>
@@ -428,7 +428,8 @@ export default function Admin() {
     </div>
   );
 }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function utcToZonedTime(arg0: Date, arg1: string): string | number | Date {
-  throw new Error("Function not implemented.");
-}
+
+// function utcToZonedTime(arg0: Date, arg1: string): string | number | Date {
+//   throw new Error("Function not implemented.");
+// }
+
