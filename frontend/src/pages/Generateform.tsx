@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 import "react-toastify/dist/ReactToastify.css";
+import { apiFetch } from "../utils/api";
 
 const GenerateForm: React.FC = () => {
   const { logout } = useAuth();
   const [formLink, setFormLink] = useState<string | null>(null);
   const [formId, setFormId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // 🔹 Load saved formId & formLink from localStorage on mount
   useEffect(() => {
     const savedFormId = localStorage.getItem("formId");
     const savedFormLink = localStorage.getItem("formLink");
@@ -26,41 +26,44 @@ const GenerateForm: React.FC = () => {
 
     try {
       setLoading(true);
-      const res = await axios.post(
-        "https://survey-pro-44pf.onrender.com/api/form/generate",
-        {}
-      );
-      if (res.data.success) {
-        const formLinkFromBackend = res.data.link;
+      setError(null);
+      const res = await apiFetch("/api/form/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const formLinkFromBackend = data.link;
         setFormLink(formLinkFromBackend);
 
-        // 🔹 Extract formId from the URL
         const extractedFormId = formLinkFromBackend.split("/").pop() || "";
         setFormId(extractedFormId);
 
-        // 🔹 Save both in localStorage
         localStorage.setItem("formLink", formLinkFromBackend);
         localStorage.setItem("formId", extractedFormId);
+        localStorage.setItem("linkId", extractedFormId); // For Home.tsx
 
         toast.success(
           "✅ Form link generated successfully! You will be logged out now."
         );
 
-        // 🔹 Logout user immediately after generating form link
         setTimeout(() => {
-          logout(); // Use AuthContext logout method for proper cleanup
-        }, 2000); // Give user time to see the success message
+          logout();
+        }, 2000);
       } else {
+        setError(data.message || "Failed to generate form link");
         toast.error("❌ Failed to generate form link");
       }
-    } catch {
+    } catch (err) {
+      console.error("Error generating form link:", err);
+      setError("Error generating form link");
       toast.error("❌ Error generating form link");
     } finally {
       setLoading(false);
     }
   };
 
-  // 🔹 Send Invites
   const sendFormInvites = async () => {
     if (!formLink) {
       toast.error("⚠️ Please generate the link first!");
@@ -68,22 +71,28 @@ const GenerateForm: React.FC = () => {
     }
     try {
       setLoading(true);
-      const res = await axios.post(
-        "https://survey-pro-44pf.onrender.com/api/form/send-invites",
-        {
-          formLink,
-        }
-      );
-      if (res.data.message) toast.success(res.data.message);
-      else toast.error("❌ Failed to send invites");
-    } catch {
+      setError(null);
+      const res = await apiFetch("/api/form/send-invites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ formLink }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(data.message || "✅ Invites sent successfully!");
+      } else {
+        setError(data.message || "Failed to send invites");
+        toast.error("❌ Failed to send invites");
+      }
+    } catch (err) {
+      console.error("Error sending invites:", err);
+      setError("Error sending invites");
       toast.error("❌ Error sending invites");
     } finally {
       setLoading(false);
     }
   };
 
-  // 🔹 Delete Form/Link
   const deleteForm = async () => {
     if (!formId) {
       toast.error("⚠️ No form available to delete");
@@ -97,22 +106,28 @@ const GenerateForm: React.FC = () => {
 
     try {
       setLoading(true);
-      const res = await axios.delete(
-        `https://survey-pro-44pf.onrender.com/api/form/responses/${formId}`
-      );
-      if (res.data.success) {
+      setError(null);
+      const res = await apiFetch(`/api/form/responses/${formId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
         setFormLink(null);
         setFormId(null);
 
-        // Remove from localStorage
         localStorage.removeItem("formLink");
         localStorage.removeItem("formId");
+        localStorage.removeItem("linkId");
 
-        toast.success(res.data.message || "✅ Form deleted successfully!");
+        toast.success(data.message || "✅ Form deleted successfully!");
       } else {
+        setError(data.message || "Failed to delete form");
         toast.error("❌ Failed to delete form");
       }
-    } catch {
+    } catch (err) {
+      console.error("Error deleting form:", err);
+      setError("Error deleting form");
       toast.error("❌ Error deleting form");
     } finally {
       setLoading(false);
@@ -126,7 +141,12 @@ const GenerateForm: React.FC = () => {
           Form Manager
         </h1>
 
-        {/* Buttons */}
+        {error && (
+          <div className="bg-red-50 border-l-4 border-red-600 p-4 rounded-xl mb-6">
+            <p className="text-red-700">{error}</p>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
           <button
             onClick={generateFormLink}
@@ -151,7 +171,6 @@ const GenerateForm: React.FC = () => {
           </button>
         </div>
 
-        {/* Generated Form Link */}
         {formLink && (
           <div className="bg-green-50 border-l-4 border-green-600 p-4 rounded-xl">
             <p className="font-semibold text-green-700">Generated Form Link:</p>
