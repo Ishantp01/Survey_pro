@@ -1,12 +1,11 @@
-import Homee from "../components/Home"
+import Homee from "../components/Home";
+
 function Home() {
   return (
     <>
-    
-    <Homee/>
-    
+      <Homee/>
     </>
-  )
+  );
 }
 
-export default Home
+export default Home;
