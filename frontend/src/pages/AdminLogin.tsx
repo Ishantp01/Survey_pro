@@ -1,15 +1,21 @@
-import React, { useState } from "react";
-import { useAuth } from "../context/AuthContext"; 
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const AdminLogin = () => {
-  const [credentials, setCredentials] = useState({ username: "", password: "" });
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: "",
+  });
   const { adminLogin } = useAuth();
 
   const handleLogin = () => {
-    if (credentials.username === "admin" && credentials.password === "admin123") {
-      adminLogin("admin_dummy_token"); 
+    if (
+      credentials.username === "admin" &&
+      credentials.password === "admin123"
+    ) {
+      adminLogin("admin_dummy_token");
       toast.success("✅ Logged in successfully!");
     } else {
       toast.error("❌ Invalid admin credentials");
@@ -27,7 +33,9 @@ const AdminLogin = () => {
           type="text"
           placeholder="Username"
           value={credentials.username}
-          onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+          onChange={(e) =>
+            setCredentials({ ...credentials, username: e.target.value })
+          }
           className="w-full mb-4 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400"
         />
 
@@ -35,7 +43,9 @@ const AdminLogin = () => {
           type="password"
           placeholder="Password"
           value={credentials.password}
-          onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+          onChange={(e) =>
+            setCredentials({ ...credentials, password: e.target.value })
+          }
           className="w-full mb-6 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400"
         />
 

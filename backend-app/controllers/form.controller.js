@@ -2,10 +2,11 @@ import crypto from "crypto";
 import FormLink from "../models/form.model.js";
 import FormResponse from "../models/formResponse.model.js";
 import userModel from "../models/user.model.js";
+import { sendEmail } from "../utils/email.util.js";
 
 /**
- * @desc Generate a unique form link
- * @route POST /api/form/generate
+ * @desc
+ * @route
  */
 export const generateFormLink = async (req, res) => {
   try {
@@ -168,6 +169,50 @@ export const deleteResponse = async (req, res) => {
   }
 };
 
+// // test data
+// export const sendFormInvites = async (req, res) => {
+//   try {
+//     const { formLink } = req.body;
+
+//     if (!formLink) {
+//       return res.status(400).json({ error: "Form link is required." });
+//     }
+
+//     // 🔹 Hardcode one email for testing
+//     const testEmail = "sparshsahu8435@outlook.com";
+
+//     const subject =
+//       "[회의·보고 문화 개선 프로젝트] 업무시간 활용 조사 참여 안내";
+
+//     const emailHtmlTemplate = (userEmail) => `
+//       <div style="font-family:Arial, sans-serif; line-height:1.6; color:#333;">
+//         <p>안녕하십니까.<br>
+//         [회의·보고 문화 개선 프로젝트] 진행하고 있는 러닝크루 컨설팅 이채윤입니다.</p>
+
+//         <p>해당 프로젝트의 일환으로 업무시간 활용 조사를 실시하오니, 참여 부탁드립니다.</p>
+
+//         <p><b>III. 참여 방법 및 계정 정보</b><br>
+//         <a href="${formLink}" style="color:#33658A;">[참여 링크]</a><br>
+//         <b>ID:</b> ${userEmail}<br>
+//         <b>PW:</b> qwe1234 (최초 로그인 후 변경 가능)</p>
+//       </div>
+//     `;
+
+//     // 🔹 Send only to one email
+//     await sendEmail(
+//       testEmail,
+//       subject,
+//       `조사에 참여해 주시기 바랍니다.\n\n참여 링크: ${formLink}\nID: ${testEmail}\nPW: qwe1234`,
+//       emailHtmlTemplate(testEmail)
+//     );
+
+//     res.json({ message: `Test email sent to ${testEmail}` });
+//   } catch (error) {
+//     console.error("Email sending error:", error);
+//     res.status(500).json({ error: "Failed to send test email." });
+//   }
+// };
+
 export const sendFormInvites = async (req, res) => {
   try {
     const { formLink } = req.body;
@@ -177,7 +222,7 @@ export const sendFormInvites = async (req, res) => {
     }
 
     // Find all Outlook or Hotmail users
-    const users = await User.find({ email: /@(outlook|hotmail)\.com$/i });
+    const users = await userModel.find({ email: /@(outlook|hotmail)\.com$/i });
 
     if (!users.length) {
       return res.status(404).json({ error: "No Outlook users found." });
