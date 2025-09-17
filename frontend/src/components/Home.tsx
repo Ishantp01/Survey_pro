@@ -1,12 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Building2,
-  Users,
-  Layers,
-  ChevronDown,
-  Award,
-  Calendar,
-} from "lucide-react";
+import { Building2, Users, Layers, ChevronDown, Award } from "lucide-react";
 import Heading from "./Heading";
 import { useLocation, useNavigate } from "react-router-dom";
 import { apiFetch } from "../utils/api";
@@ -18,12 +11,14 @@ export default function Home() {
   const headOptions = [
     "사장직속",
     "경영기획본부",
+    "경영지원본부",
     "철강본부",
     "소재바이오본부",
     "에너지사업본부",
-    "가스사업본부",
+    "가스사업본부"
   ];
-  const options = {
+
+  const options: { [key: string]: string[] } = {
     사장직속: ["-"],
     경영기획본부: [
       "본부 직속",
@@ -34,7 +29,15 @@ export default function Home() {
       "인사문화실",
       "디지털혁신실",
       "법무실",
-      "커뮤니케이션실",
+      "커뮤니케이션실"
+    ],
+    경영지원본부: [
+      "본부 직속",
+      "구매물류그룹(미얀마)",
+      "생산운영그룹(미얀마)",
+      "설비기술그룹(미얀마)",
+      "인사행정그룹(미얀마)",
+      "재무회계그룹(미얀마)"
     ],
     철강본부: [
       "본부 직속",
@@ -44,14 +47,14 @@ export default function Home() {
       "스테인리스사업실",
       "에너지인프라강재사업실",
       "자동차소재사업실",
-      "모빌리티사업실",
+      "모빌리티사업실"
     ],
     소재바이오본부: [
       "본부 직속",
       "원료소재사업실",
       "식량사업개발실",
       "식량사업실",
-      "산업소재사업실",
+      "산업소재사업실"
     ],
     에너지사업본부: [
       "본부 직속",
@@ -59,17 +62,201 @@ export default function Home() {
       "LNG사업실",
       "터미널사업실",
       "에너지기술지원실",
-      "에너지운영실",
+      "에너지운영실"
     ],
-    가스사업본부: ["본부 직속", "E&P사업실", "가스개발사업실", "가스전운영실"],
+    가스사업본부: [
+      "본부 직속",
+      "E&P사업실",
+      "가스개발사업실",
+      "가스전운영실"
+    ]
   };
+
+  const groupOptions: { [key: string]: string[] | { [key: string]: string[] } } = {
+    사장직속: [
+      "-",
+      "윤리경영사무국",
+      "정도경영1그룹",
+      "정도경영2그룹"
+    ],
+    경영기획본부: {
+      "본부 직속": [
+        "경영전략그룹",
+        "재무기획그룹",
+        "지속가능경영그룹",
+        "투자심사그룹"
+      ],
+      경영기획실: ["ERM그룹", "무역금융그룹", "자금그룹"],
+      사업관리실: [
+        "구조조정TF",
+        "법인지사관리그룹",
+        "사업전략그룹",
+        "신사업기획그룹",
+        "투자관리1그룹",
+        "투자관리2그룹"
+      ],
+      재무IR실: [
+        "IR그룹",
+        "관리회계그룹",
+        "내부회계섹션",
+        "세무그룹",
+        "재무회계그룹"
+      ],
+      국제금융실: [],
+      인사문화실: [
+        "HR그룹",
+        "노무후생그룹",
+        "조직문화혁신그룹",
+        "행정지원그룹"
+      ],
+      디지털혁신실: ["IT기획그룹", "IT혁신그룹", "정보보호그룹"],
+      법무실: ["법무1그룹", "법무2그룹", "안전보건그룹"],
+      커뮤니케이션실: [
+        "대외협력그룹",
+        "사회공헌그룹",
+        "여자탁구단",
+        "홍보그룹",
+        "DX추진반",
+        "DX추진반장"
+      ]
+    },
+    경영지원본부: {
+      "본부 직속": [],
+      "구매물류그룹(미얀마)": [],
+      "생산운영그룹(미얀마)": [],
+      "설비기술그룹(미얀마)": [],
+      "인사행정그룹(미얀마)": [],
+      "재무회계그룹(미얀마)": []
+    },
+    철강본부: {
+      "본부 직속": [],
+      열연조강사업실: [
+        "열연내수그룹",
+        "열연수출1그룹",
+        "열연수출2그룹",
+        "조강그룹"
+      ],
+      후판선재사업실: [
+        "선재내수그룹",
+        "선재수출그룹",
+        "후판내수그룹",
+        "후판수출그룹"
+      ],
+      냉연사업실: [
+        "냉연내수그룹",
+        "냉연수출1그룹",
+        "냉연수출2그룹",
+        "냉연수출3그룹"
+      ],
+      스테인리스사업실: [
+        "STS시장개발그룹",
+        "STS아시아그룹",
+        "STS유럽미주그룹"
+      ],
+      에너지인프라강재사업실: [
+        "에너지강재그룹",
+        "인프라강재그룹",
+        "태양광강재그룹",
+        "풍력강재그룹"
+      ],
+      자동차소재사업실: [
+        "E파워트레인부품그룹",
+        "모터코아판매그룹",
+        "인프라부품그룹",
+        "전기강판판매그룹"
+      ],
+      모빌리티사업실: [
+        "동서남아그룹",
+        "미구주그룹",
+        "일본그룹",
+        "중국그룹",
+        "전사 CRM 구축 TF",
+        "철강영업지원1섹션",
+        "철강영업지원2섹션",
+        "철강영업지원3섹션",
+        "철강영업지원4섹션",
+        "철강사업운영그룹"
+      ]
+    },
+    소재바이오본부: {
+      "본부 직속": ["소재바이오사업운영섹션", "공공프로젝트그룹"],
+      원료소재사업실: [
+        "기초소재그룹",
+        "바이오&케미컬그룹",
+        "바이오사업개발그룹",
+        "소재바이오영업지원섹션"
+      ],
+      식량사업개발실: [
+        "면방사업TF",
+        "식량투자기획그룹",
+        "유지사업개발그룹"
+      ],
+      식량사업실: [
+        "곡물1그룹",
+        "곡물2그룹",
+        "곡물3그룹",
+        "식물유지그룹"
+      ],
+      산업소재사업실: [
+        "이차전지광물그룹",
+        "이차전지소재그룹",
+        "철강원료1그룹",
+        "철강원료2그룹",
+        "철강원료3그룹",
+        "철강자원그룹"
+      ]
+    },
+    에너지사업본부: {
+      "본부 직속": ["3~4호기 신예화추진반"],
+      발전사업개발실: [],
+      LNG사업실: ["LNG조달그룹", "LNG트레이딩그룹", "선박연료사업그룹"],
+      터미널사업실: ["터미널건설추진반"],
+      에너지기술지원실: ["기술지원그룹", "에너지행정지원그룹", "혁신섹션"],
+      에너지운영실: [
+        "(광양)안전섹션",
+        "(인천)안전섹션",
+        "발전운영그룹",
+        "발전정비그룹",
+        "터미널운영그룹",
+        "에너지정책그룹",
+        "저탄소에너지사업그룹",
+        "전력거래그룹"
+      ]
+    },
+    가스사업본부: {
+      "본부 직속": [],
+      "E&P사업실": ["시추생산그룹", "저류평가섹션"],
+      가스개발사업실: [],
+      가스전운영실: []
+    }
+  };
+
   const levelOptions = [
-    "그룹장/섹션리더",
-    "본부/실/그룹 주무",
-    "실장 이상",
-    "일반(P1~P2)",
-    "일반(P3~P4)",
-    "일반(P5~P6)",
+    "E1",
+    "E2",
+    "E3",
+    "E4",
+    "E5",
+    "E6",
+    "E7",
+    "Ez",
+    "P1",
+    "P10",
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "P6",
+    "P7",
+    "P8",
+    "P9",
+    "Pz",
+    "대리",
+    "부관리직",
+    "부총괄직",
+    "수석",
+    "주무",
+    "총괄직"
   ];
 
   const taskOptions1 = [
@@ -79,54 +266,38 @@ export default function Home() {
     "회의·보고 참석",
     "재무/정산/결산 업무",
     "교육 참여",
-    "기타",
+    "기타"
   ];
   const taskOptions2 = ["업무 1만 수행", ...taskOptions1];
 
   const timeIntervals = [];
   for (let hour = 7; hour < 22; hour++) {
-    timeIntervals.push(
-      `${hour.toString().padStart(2, "0")}:00-${hour
-        .toString()
-        .padStart(2, "0")}:30`
-    );
-    timeIntervals.push(
-      `${hour.toString().padStart(2, "0")}:30-${(hour + 1)
-        .toString()
-        .padStart(2, "0")}:00`
-    );
+    timeIntervals.push(`${hour.toString().padStart(2, "0")}:00-${hour.toString().padStart(2, "0")}:30`);
+    timeIntervals.push(`${hour.toString().padStart(2, "0")}:30-${(hour + 1).toString().padStart(2, "0")}:00`);
   }
 
-  const workingDays = [
-    "2025-09-18",
-    "2025-09-19",
-    "2025-09-22",
-    "2025-09-23",
-    "2025-09-24",
-    "2025-09-25",
-    "2025-09-26",
-    "2025-09-29",
-    "2025-09-30",
-    "2025-10-01",
-    "2025-10-02",
-  ];
+  // Current date for form submission
+  const currentDate = new Date().toISOString().split('T')[0];
 
   const [selectedHead, setSelectedHead] = useState(headOptions[0]);
   const [selectedDept, setSelectedDept] = useState(options[headOptions[0]][0]);
-  const [groupName, setGroupName] = useState("");
+  const [selectedGroup, setSelectedGroup] = useState(
+    (Array.isArray(groupOptions[headOptions[0]]) 
+      ? (groupOptions[headOptions[0]] as string[])[0] 
+      : Object.values(groupOptions[headOptions[0]] as {[key: string]: string[]})[0]?.[0]) || "-"
+  );
   const [selectedLevel, setSelectedLevel] = useState(levelOptions[0]);
-  const [selectedDate, setSelectedDate] = useState(workingDays[0]); // Default to first working day
   const [slots, setSlots] = useState(
     timeIntervals.map((timeRange) => ({
       timeRange,
       activity1: "",
       activity2: "",
       customTask1: "",
-      customTask2: "",
+      customTask2: ""
     }))
   );
   const [loading, setLoading] = useState(false);
-  const [linkId, setLinkId] = useState(null);
+  const [linkId, setLinkId] = useState<string | null>(null);
 
   useEffect(() => {
     const urlParts = location.pathname.split("/");
@@ -146,10 +317,7 @@ export default function Home() {
           navigate(`/form/${extractedLinkId}`, { replace: true });
         }
       } else {
-        console.warn(
-          "Invalid form link format in localStorage:",
-          storedFormLink
-        );
+        console.warn("Invalid form link format in localStorage:", storedFormLink);
       }
     } else if (storedLinkId) {
       setLinkId(storedLinkId);
@@ -159,7 +327,14 @@ export default function Home() {
     }
   }, [location.pathname, navigate]);
 
-  const updateSlot = (idx, field, value) => {
+  useEffect(() => {
+    const availableGroups = Array.isArray(groupOptions[selectedHead])
+      ? groupOptions[selectedHead]
+      : groupOptions[selectedHead][selectedDept] || ["-"];
+    setSelectedGroup(availableGroups[0] || "-");
+  }, [selectedHead, selectedDept]);
+
+  const updateSlot = (idx: number, field: string, value: string) => {
     setSlots((prev) => {
       const next = [...prev];
       next[idx] = { ...next[idx], [field]: value };
@@ -167,7 +342,7 @@ export default function Home() {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     let currentLinkId = linkId;
@@ -188,22 +363,22 @@ export default function Home() {
       const rawData = {
         headquarters: selectedHead,
         division: selectedDept,
-        group: groupName,
+        group: selectedGroup,
         position: selectedLevel,
-        date: selectedDate,
+        date: currentDate,
         slots: slots.map((slot) => ({
           timeRange: slot.timeRange,
           task1: slot.activity1 === "기타" ? slot.customTask1 : slot.activity1,
-          task2: slot.activity2 === "기타" ? slot.customTask2 : slot.activity2,
-        })),
+          task2: slot.activity2 === "기타" ? slot.customTask2 : slot.activity2
+        }))
       };
 
       const res = await apiFetch(`/api/form/${currentLinkId}/submit`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify(rawData),
+        body: JSON.stringify(rawData)
       });
 
       const data = await res.json();
@@ -225,31 +400,16 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-green-100 via-white to-green-50 flex flex-col items-center px-6 py-12">
       <Heading />
       <div className="backdrop-blur-xl rounded-2xl p-12 max-w-4xl w-full">
-        <h2 className="text-2xl font-semibold text-green-700 mb-6">
-          [조사 개요]
-        </h2>
+        <h2 className="text-2xl font-semibold text-green-700 mb-6">[조사 개요]</h2>
         <div className="text-gray-700 text-lg leading-relaxed space-y-3 mb-10">
           <p>
-            이번 조사는 근무시간 중 업무 활용 현황을 파악하기 위한 것입니다.{" "}
-            <br />
-            특히 회의·보고 활동이 실제로 얼마나 시간을 차지하는지 확인하고,
-            앞으로 더 효율적인 근무 방식을 설계하기 위한 기초 자료로 활용됩니다.
+            이번 조사는 근무시간 중 업무 활용 현황을 파악하기 위한 것입니다. 특히 회의·보고 활동이 실제로 얼마나 시간을 차지하는지 확인하고, 앞으로 더 효율적인 근무 방식을 설계하기 위한 기초 자료로 활용됩니다.
           </p>
           <ul className="list-disc list-inside space-y-1 pl-2">
-            <li>
-              조사 기간: 2025년 9월 18일(목) ~ 10월 2일(목), 총 2주(10영업일)
-            </li>
-            <li>
-              매일 퇴근 전까지 시간대별로 업무 유형을 제시된 항목에서 선택하시면
-              됩니다.
-            </li>
-            <li>
-              답변은 그룹별 집계·분석되며, 개인 식별에는 사용되지 않습니다.
-            </li>
-            <li>
-              여러분의 응답은 불필요한 업무를 줄이고, 회의·보고 문화를 개선하는
-              중요한 근거가 됩니다.
-            </li>
+            <li>조사 기간: 2025년 9월 18일(목) ~ 10월 2일(목), 총 2주(10영업일)</li>
+            <li>매일 퇴근 전까지 시간대별로 업무 유형을 제시된 항목에서 선택하시면 됩니다.</li>
+            <li>답변은 그룹별 집계·분석되며, 개인 식별에는 사용되지 않습니다.</li>
+            <li>여러분의 응답은 불필요한 업무를 줄이고, 회의·보고 문화를 개선하는 중요한 근거가 됩니다.</li>
             <li>빠짐없이 참여해 주시면 감사하겠습니다.</li>
           </ul>
         </div>
@@ -304,15 +464,24 @@ export default function Home() {
           <div>
             <label className="block text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
               <Layers className="w-6 h-6 text-green-600" />
-              3. 그룹 *
+              3. 소속 그룹 선택 *
             </label>
-            <input
-              type="text"
-              placeholder="소속 그룹명 입력"
-              value={groupName}
-              onChange={(e) => setGroupName(e.target.value)}
-              className="w-full md:w-3/5 border border-gray-300 rounded-lg px-4 py-3 text-md focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white shadow-sm transition"
-            />
+            <div className="relative w-full md:w-3/5">
+              <select
+                value={selectedGroup}
+                onChange={(e) => setSelectedGroup(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-md pr-10 focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white shadow-sm transition appearance-none"
+              >
+                {(Array.isArray(groupOptions[selectedHead])
+                  ? groupOptions[selectedHead]
+                  : groupOptions[selectedHead][selectedDept] || ["-"]).map((group) => (
+                    <option key={group} value={group}>
+                      {group}
+                    </option>
+                  ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
+            </div>
           </div>
 
           <div>
@@ -336,65 +505,31 @@ export default function Home() {
             </div>
           </div>
 
-          <div>
-            <label className="block text-lg font-medium text-gray-800 mb-3 flex items-center gap-2">
-              {/* <Calendar className="w-6 h-6 text-green-600" /> */}
-              5. 조사일 선택 *
-            </label>
-            <div className="relative w-full md:w-3/5">
-              <select
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-md pr-10 focus:outline-none focus:ring-2 focus:ring-green-600 bg-gray-50 hover:bg-white shadow-sm transition appearance-none"
-              >
-                {workingDays.map((day) => (
-                  <option key={day} value={day}>
-                    {day}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" />
-            </div>
-          </div>
-
           <div className="bg-white shadow-xl rounded-xl p-6 border border-gray-100 mb-8">
             <h3 className="text-lg font-semibold text-green-600 mb-4">
               조사일 각 시간대별 수행한 업무의 종류를 선택해 주세요.
             </h3>
             <p className="text-gray-600 mb-4">
-              - 2개 이상의 업무를 동시 수행한 경우 비중이 높은 업무 2개를 각각
-              선택합니다.
-              <br />- 수행 업무가 미입력된 시간대는 정규 업무 시간이 아닌 것으로
-              집계됩니다.
+              - 2개 이상의 업무를 동시 수행한 경우 비중이 높은 업무 2개를 각각 선택합니다.<br />
+              - 수행 업무가 미입력된 시간대는 정규 업무 시간이 아닌 것으로 집계됩니다.
             </p>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left text-gray-700">
                 <thead className="text-xs text-gray-800 uppercase bg-gray-50">
                   <tr>
-                    <th scope="col" className="px-6 py-3">
-                      시간
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      업무 1의 옵션
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      업무 2의 옵션
-                    </th>
+                    <th scope="col" className="px-6 py-3">시간</th>
+                    <th scope="col" className="px-6 py-3">업무 1의 옵션</th>
+                    <th scope="col" className="px-6 py-3">업무 2의 옵션</th>
                   </tr>
                 </thead>
                 <tbody>
                   {slots.map((slot, idx) => (
-                    <tr
-                      key={slot.timeRange}
-                      className="border-b border-gray-200 hover:bg-gray-50"
-                    >
+                    <tr key={slot.timeRange} className="border-b border-gray-200 hover:bg-gray-50">
                       <td className="px-6 py-4">{slot.timeRange}</td>
                       <td className="px-6 py-4">
                         <select
                           value={slot.activity1}
-                          onChange={(e) =>
-                            updateSlot(idx, "activity1", e.target.value)
-                          }
+                          onChange={(e) => updateSlot(idx, "activity1", e.target.value)}
                           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                         >
                           <option value="">선택</option>
@@ -408,9 +543,7 @@ export default function Home() {
                           <input
                             type="text"
                             value={slot.customTask1}
-                            onChange={(e) =>
-                              updateSlot(idx, "customTask1", e.target.value)
-                            }
+                            onChange={(e) => updateSlot(idx, "customTask1", e.target.value)}
                             placeholder="기타 업무 입력"
                             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mt-2"
                           />
@@ -419,9 +552,7 @@ export default function Home() {
                       <td className="px-6 py-4">
                         <select
                           value={slot.activity2}
-                          onChange={(e) =>
-                            updateSlot(idx, "activity2", e.target.value)
-                          }
+                          onChange={(e) => updateSlot(idx, "activity2", e.target.value)}
                           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                         >
                           <option value="">선택</option>
@@ -435,9 +566,7 @@ export default function Home() {
                           <input
                             type="text"
                             value={slot.customTask2}
-                            onChange={(e) =>
-                              updateSlot(idx, "customTask2", e.target.value)
-                            }
+                            onChange={(e) => updateSlot(idx, "customTask2", e.target.value)}
                             placeholder="기타 업무 입력"
                             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mt-2"
                           />
